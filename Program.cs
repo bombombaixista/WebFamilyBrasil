@@ -1,34 +1,67 @@
-﻿using Kanban.Data;
+﻿using Kanban.Model;
+using Kanban.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using QuestPDF.Infrastructure; // para configurar licença do QuestPDF
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 🔗 Connection string (ajuste no appsettings.json)
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-builder.Services.AddDbContext<KanbanContext>(options =>
-    options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 36)))
+// ==========================
+// DbContext (MYSQL)
+// ==========================
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseMySql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        new MySqlServerVersion(new Version(8, 0, 36)) // ajuste conforme versão do MySQL no Railway
+    )
 );
 
-// 🔑 Autenticação por cookies
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/Login/Index";   // rota para login
-        options.LogoutPath = "/Login/Logout"; // rota para logout
-        options.AccessDeniedPath = "/Login/Index"; // rota para acesso negado
-    });
-
+// ==========================
+// MVC
+// ==========================
 builder.Services.AddControllersWithViews();
 
-// ⚙️ Configuração da licença do QuestPDF
-QuestPDF.Settings.License = LicenseType.Community;
+// ==========================
+// HttpClient (para serviços externos)
+// ==========================
+builder.Services.AddHttpClient();
 
+// ==========================
+// Serviços customizados
+// ==========================
+builder.Services.AddScoped<UserService>();
+
+// ==========================
+// Session
+// ==========================
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+// ==========================
+// Cookie Authentication
+// ==========================
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+.AddCookie(options =>
+{
+    options.LoginPath = "/Login/Index";        // fluxo ajustado
+    options.AccessDeniedPath = "/Login/Index"; // fluxo ajustado
+    options.ExpireTimeSpan = TimeSpan.FromHours(2);
+    options.SlidingExpiration = true;
+});
+
+// ==========================
+// APP
+// ==========================
 var app = builder.Build();
 
-// 🔧 Configuração de ambiente
+// ==========================
+// PIPELINE
+// ==========================
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -40,13 +73,17 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// 🚨 Ordem correta: autenticação antes da autorização
+// ⚠️ Ordem correta
+app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// 🔗 Rotas padrão
+// ==========================
+// ROTAS
+// ==========================
+// Agora o fluxo padrão já aponta para Landing/Index
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Login}/{action=Index}/{id?}");
+    pattern: "{controller=Cliente2}/{action=Cadastrar}/{id?}");
 
 app.Run();

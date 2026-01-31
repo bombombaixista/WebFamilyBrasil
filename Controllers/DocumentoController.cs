@@ -1,35 +1,53 @@
-﻿using MeuSistema.Models;
+﻿using Kanban.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Security.Claims;
 
-namespace MeuSistema.Controllers
+namespace Kanban.Controllers
 {
     [Authorize]
     [Route("[controller]")]
     public class DocumentoController : Controller
     {
         private readonly IWebHostEnvironment _env;
-        private readonly string _documentosPath;
         private readonly JsonSerializerOptions _jsonOptions;
 
         public DocumentoController(IWebHostEnvironment env)
         {
             _env = env;
-
-            // Corrigido: "Data" com D maiúsculo para funcionar no Railway (Linux é case-sensitive)
-            _documentosPath = Path.Combine(_env.ContentRootPath, "Data", "documentos.json");
-            Directory.CreateDirectory(Path.Combine(_env.ContentRootPath, "Data"));
-
             _jsonOptions = new JsonSerializerOptions
             {
                 WriteIndented = true,
                 PropertyNameCaseInsensitive = true,
                 Converters = { new JsonStringEnumConverter() }
             };
+        }
+
+        // =========================
+        // Helpers para pasta do usuário
+        // =========================
+        private string GetUserDataPath()
+        {
+            var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(email))
+                throw new Exception("Usuário não logado.");
+
+            var folderName = email.Replace("@", "_").Replace(".", "_");
+            var userPath = Path.Combine(_env.ContentRootPath, "Data", "User2", folderName);
+
+            if (!Directory.Exists(userPath))
+                Directory.CreateDirectory(userPath);
+
+            return userPath;
+        }
+
+        private string GetDocumentosFilePath()
+        {
+            return Path.Combine(GetUserDataPath(), "documento.json");
         }
 
         // =========================
@@ -40,17 +58,16 @@ namespace MeuSistema.Controllers
         {
             var docs = CarregarDocumentos();
 
-            // total de clientes = quantidade de nomes distintos nos documentos
-            var totalClientes = docs.Select(d => d.Nome)
-                                    .Where(n => !string.IsNullOrWhiteSpace(n))
-                                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                                    .Count();
+            var totalClientes = docs
+                .Select(d => d.Nome)
+                .Where(n => !string.IsNullOrWhiteSpace(n))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Count();
 
             ViewBag.TotalClientes = totalClientes;
             ViewBag.TotalDocumentos = docs.Count;
             ViewBag.TotalVendas = 0;
 
-            // Gráfico Pizza: quantidade por categoria
             var categorias = docs
                 .GroupBy(d => d.Categoria)
                 .Select(g => new { Categoria = g.Key, Quantidade = g.Count() })
@@ -59,7 +76,6 @@ namespace MeuSistema.Controllers
             ViewBag.Categorias = categorias.Select(c => c.Categoria).ToList();
             ViewBag.Quantidades = categorias.Select(c => c.Quantidade).ToList();
 
-            // Donut: quantidade de documentos por cliente
             var docsPorCliente = docs
                 .GroupBy(d => d.Nome)
                 .Select(g => new { Cliente = g.Key, Quantidade = g.Count() })
@@ -68,7 +84,7 @@ namespace MeuSistema.Controllers
             ViewBag.Clientes = docsPorCliente.Select(c => c.Cliente).ToList();
             ViewBag.DocsPorCliente = docsPorCliente.Select(c => c.Quantidade).ToList();
 
-            return View(docs); // passa sempre uma lista para a view
+            return View(docs);
         }
 
         // =========================
@@ -95,19 +111,18 @@ namespace MeuSistema.Controllers
 
             var docs = CarregarDocumentos();
 
-            var webRoot = _env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot");
-            var pastaCliente = Path.Combine(webRoot, "docs", SanitizeFolder(cliente));
+            var pastaCliente = Path.Combine(GetUserDataPath(), "docs", SanitizeFolder(cliente));
             Directory.CreateDirectory(pastaCliente);
 
             foreach (var arquivo in arquivos)
             {
-                if (arquivo?.Length > 0)
+                if (arquivo.Length > 0)
                 {
                     var nomeArquivo = Path.GetFileName(arquivo.FileName);
                     var caminhoFisico = Path.Combine(pastaCliente, nomeArquivo);
 
-                    using (var stream = new FileStream(caminhoFisico, FileMode.Create))
-                        arquivo.CopyTo(stream);
+                    using var stream = new FileStream(caminhoFisico, FileMode.Create);
+                    arquivo.CopyTo(stream);
 
                     var novoId = docs.Any() ? docs.Max(d => d.Id) + 1 : 1;
 
@@ -132,19 +147,21 @@ namespace MeuSistema.Controllers
         // =========================
         private List<Documento> CarregarDocumentos()
         {
-            if (!System.IO.File.Exists(_documentosPath))
+            var path = GetDocumentosFilePath();
+            if (!System.IO.File.Exists(path))
                 return new List<Documento>();
 
-            var json = System.IO.File.ReadAllText(_documentosPath);
+            var json = System.IO.File.ReadAllText(path);
             return JsonSerializer.Deserialize<List<Documento>>(json, _jsonOptions) ?? new List<Documento>();
         }
 
         private void SalvarDocumentos(List<Documento> docs)
         {
-            var dir = Path.GetDirectoryName(_documentosPath)!;
+            var path = GetDocumentosFilePath();
+            var dir = Path.GetDirectoryName(path)!;
             Directory.CreateDirectory(dir);
             var json = JsonSerializer.Serialize(docs, _jsonOptions);
-            System.IO.File.WriteAllText(_documentosPath, json);
+            System.IO.File.WriteAllText(path, json);
         }
 
         private static string SanitizeFolder(string name)

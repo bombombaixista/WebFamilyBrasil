@@ -1,0 +1,31 @@
+﻿@model WebFamily.Models.PedidoDto
+
+<h2>Detalhes do Pedido</h2>
+
+<p><strong>ID:</strong> @Model.Id</p>
+<p><strong>Origem:</strong> @Model.Origem</p>
+<p><strong>Cliente:</strong> @Model.Cliente</p>
+<p><strong>Data:</strong> @Model.Data.ToString("dd/MM/yyyy HH:mm")</p>
+<p><strong>Valor:</strong> @Model.ValorTotal.ToString("C")</p>
+<p><strong>Status:</strong> @Model.Status</p>
+
+<h3>Endereço de Entrega</h3>
+<p>@Model.Endereco<br />@Model.Cidade - @Model.Estado<br />CEP: @Model.CEP</p>
+
+<h3>Envio</h3>
+<p><strong>Transportadora:</strong> @Model.Transportadora</p>
+<p><strong>Código de Rastreamento:</strong> @Model.CodigoRastreamento</p>
+
+<h3>Itens</h3>
+<ul>
+    @foreach (var item in Model.Itens)
+    {
+        <li>
+            <strong>@item.NomeProduto</strong> (SKU: @item.SKU)
+            - Qtd: @item.Quantidade
+            - Preço: @item.PrecoUnitario.ToString("C")
+        </li>
+    }
+</ul>
+
+<a asp-controller="Pedidos" asp-action="Index" class="btn btn-secondary">Voltar</a>

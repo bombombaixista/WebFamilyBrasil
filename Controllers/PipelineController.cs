@@ -2,11 +2,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using System.Security.Claims;
 
 namespace Kanban.Controllers
 {
     [Authorize]
-
     [Route("[controller]")]
     public class PipelineController : Controller
     {
@@ -19,13 +19,37 @@ namespace Kanban.Controllers
             Directory.CreateDirectory(_dataPath);
         }
 
+        private string GetUserDataPath()
+        {
+            var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(email))
+                throw new Exception("Usuário não logado.");
+
+            // 🔹 Normaliza o email para nome de pasta
+            var folderName = email.Replace("@", "_").Replace(".", "_");
+
+            // 🔹 Estrutura correta: Kanban/Data/User2/<email>
+            var userPath = Path.Combine(_dataPath, "User2", folderName);
+
+            if (!Directory.Exists(userPath))
+                Directory.CreateDirectory(userPath);
+
+            return userPath;
+        }
+
+        private string GetPipelineFilePath()
+        {
+            // 🔹 Apenas junta o arquivo dentro da pasta do usuário
+            return Path.Combine(GetUserDataPath(), "pipeline.json");
+        }
+
         [HttpGet]
         public IActionResult Index() => View();
 
         [HttpGet("Listar")]
         public IActionResult Listar()
         {
-            var path = Path.Combine(_dataPath, "pipeline.json");
+            var path = GetPipelineFilePath();
             if (!System.IO.File.Exists(path)) return Ok(new List<PipelineVenda>());
             var json = System.IO.File.ReadAllText(path);
             var vendas = JsonSerializer.Deserialize<List<PipelineVenda>>(json, _jsonOptions) ?? new List<PipelineVenda>();
@@ -35,7 +59,7 @@ namespace Kanban.Controllers
         [HttpPost("Adicionar")]
         public IActionResult Adicionar([FromBody] PipelineVenda venda)
         {
-            var path = Path.Combine(_dataPath, "pipeline.json");
+            var path = GetPipelineFilePath();
             var vendas = System.IO.File.Exists(path)
                 ? JsonSerializer.Deserialize<List<PipelineVenda>>(System.IO.File.ReadAllText(path), _jsonOptions) ?? new List<PipelineVenda>()
                 : new List<PipelineVenda>();
@@ -50,7 +74,7 @@ namespace Kanban.Controllers
         [HttpPut("Mover/{id}")]
         public IActionResult Mover(int id, [FromBody] int novoStageId)
         {
-            var path = Path.Combine(_dataPath, "pipeline.json");
+            var path = GetPipelineFilePath();
             if (!System.IO.File.Exists(path)) return NotFound();
 
             var vendas = JsonSerializer.Deserialize<List<PipelineVenda>>(System.IO.File.ReadAllText(path), _jsonOptions) ?? new List<PipelineVenda>();
@@ -66,7 +90,7 @@ namespace Kanban.Controllers
         [HttpDelete("Apagar/{id}")]
         public IActionResult Apagar(int id)
         {
-            var path = Path.Combine(_dataPath, "pipeline.json");
+            var path = GetPipelineFilePath();
             if (!System.IO.File.Exists(path)) return NotFound();
 
             var vendas = JsonSerializer.Deserialize<List<PipelineVenda>>(System.IO.File.ReadAllText(path), _jsonOptions) ?? new List<PipelineVenda>();

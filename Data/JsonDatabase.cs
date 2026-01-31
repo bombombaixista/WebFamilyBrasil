@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace Kanban.Data
+namespace Kanban.Model
 {
     public class JsonDatabase<T> where T : class
     {

@@ -2,47 +2,69 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using System.Security.Claims;
 
 namespace Kanban.Controllers
 {
     [Authorize]
-
     [Route("[controller]")]
     public class ProdutoController : Controller
     {
-        private readonly string _dataPath;
-        private readonly string _produtosFile;
-        private readonly string _movFile;
+        private readonly IWebHostEnvironment _env;
 
         public ProdutoController(IWebHostEnvironment env)
         {
-            _dataPath = Path.Combine(env.ContentRootPath, "Data");
-            Directory.CreateDirectory(_dataPath);
-
-            _produtosFile = Path.Combine(_dataPath, "produtos.json");
-            _movFile = Path.Combine(_dataPath, "movimentacoes.json");
-
-            if (!System.IO.File.Exists(_produtosFile))
-                System.IO.File.WriteAllText(_produtosFile, "[]");
-
-            if (!System.IO.File.Exists(_movFile))
-                System.IO.File.WriteAllText(_movFile, "[]");
+            _env = env;
         }
 
         // ===================== HELPERS =====================
-        private List<Produto> LerProdutos() =>
-            JsonSerializer.Deserialize<List<Produto>>(System.IO.File.ReadAllText(_produtosFile)) ?? new();
+        private string GetUserDataPath()
+        {
+            var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(email))
+                throw new Exception("Usuário não logado.");
 
-        private void SalvarProdutos(List<Produto> produtos) =>
-            System.IO.File.WriteAllText(_produtosFile,
-                JsonSerializer.Serialize(produtos, new JsonSerializerOptions { WriteIndented = true }));
+            var folderName = email.Replace("@", "_").Replace(".", "_");
+            var userPath = Path.Combine(_env.ContentRootPath, "Data", "User2", folderName);
 
-        private List<Movimentacao> LerMovimentacoes() =>
-            JsonSerializer.Deserialize<List<Movimentacao>>(System.IO.File.ReadAllText(_movFile)) ?? new();
+            if (!Directory.Exists(userPath))
+                Directory.CreateDirectory(userPath);
 
-        private void SalvarMovimentacoes(List<Movimentacao> movs) =>
-            System.IO.File.WriteAllText(_movFile,
-                JsonSerializer.Serialize(movs, new JsonSerializerOptions { WriteIndented = true }));
+            return userPath;
+        }
+
+        private string GetProdutosFilePath() => Path.Combine(GetUserDataPath(), "produtos.json");
+        private string GetMovFilePath() => Path.Combine(GetUserDataPath(), "movimentacoes.json");
+
+        private List<Produto> LerProdutos()
+        {
+            var path = GetProdutosFilePath();
+            if (!System.IO.File.Exists(path)) System.IO.File.WriteAllText(path, "[]");
+            var json = System.IO.File.ReadAllText(path);
+            return JsonSerializer.Deserialize<List<Produto>>(json) ?? new();
+        }
+
+        private void SalvarProdutos(List<Produto> produtos)
+        {
+            var path = GetProdutosFilePath();
+            var json = JsonSerializer.Serialize(produtos, new JsonSerializerOptions { WriteIndented = true });
+            System.IO.File.WriteAllText(path, json);
+        }
+
+        private List<Movimentacao> LerMovimentacoes()
+        {
+            var path = GetMovFilePath();
+            if (!System.IO.File.Exists(path)) System.IO.File.WriteAllText(path, "[]");
+            var json = System.IO.File.ReadAllText(path);
+            return JsonSerializer.Deserialize<List<Movimentacao>>(json) ?? new();
+        }
+
+        private void SalvarMovimentacoes(List<Movimentacao> movs)
+        {
+            var path = GetMovFilePath();
+            var json = JsonSerializer.Serialize(movs, new JsonSerializerOptions { WriteIndented = true });
+            System.IO.File.WriteAllText(path, json);
+        }
 
         // ===================== LISTAGEM =====================
         [HttpGet]

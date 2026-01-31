@@ -1,11 +1,11 @@
-﻿namespace MeuSistema.Models
+﻿namespace Kanban.Models
 {
     public class Documento
     {
         public int Id { get; set; }
-        public string Nome { get; set; }        // aqui usamos para guardar o cliente
-        public string Caminho { get; set; }     // caminho físico do arquivo
+        public string Nome { get; set; } = string.Empty;
+        public string Categoria { get; set; } = string.Empty;
+        public string Caminho { get; set; } = string.Empty;
         public DateTime DataUpload { get; set; }
-        public string Categoria { get; set; }
     }
 }

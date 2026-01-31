@@ -1,133 +1,74 @@
-﻿using Kanban.Data;
+﻿using Microsoft.AspNetCore.Mvc;
 using Kanban.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Linq;
 
-namespace Kanban.Controllers
+public class LoginController : Controller
 {
-    public class LoginController : Controller
+    private readonly AppDbContext _context;
+    private readonly PasswordHasher<Cliente2> _passwordHasher;
+
+    public LoginController(AppDbContext context)
     {
-        private readonly KanbanContext _context;
+        _context = context;
+        _passwordHasher = new PasswordHasher<Cliente2>();
+    }
 
-        public LoginController(KanbanContext context)
+    // GET: Login
+    [HttpGet]
+    public IActionResult Index()
+    {
+        return View(); // Views/Login/Index.cshtml
+    }
+
+    // POST: Login
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Login(string email, string senha)
+    {
+        var cliente = _context.Clientes2.FirstOrDefault(c => c.Email == email);
+
+        if (cliente == null)
         {
-            _context = context;
+            ModelState.AddModelError("", "Usuário não encontrado.");
+            return View("Index");
         }
 
-        // Tela de login
-        [HttpGet]
-        [AllowAnonymous]
-        public IActionResult Index()
+        var result = _passwordHasher.VerifyHashedPassword(cliente, cliente.SenhaHash, senha);
+
+        if (result == PasswordVerificationResult.Success)
         {
-            return View();
-        }
-
-        // Login
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(string email, string senha)
-        {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-
-            if (user == null)
-            {
-                ModelState.AddModelError("", "Email ou senha inválidos.");
-                return View("Index");
-            }
-
-            bool senhaValida = false;
-
-            if (user.Senha.StartsWith("$2")) // BCrypt
-            {
-                senhaValida = BCrypt.Net.BCrypt.Verify(senha, user.Senha);
-            }
-            else if (user.Senha == senha) // senha antiga em texto puro
-            {
-                senhaValida = true;
-                user.Senha = BCrypt.Net.BCrypt.HashPassword(senha);
-                _context.Users.Update(user);
-                await _context.SaveChangesAsync();
-            }
-
-            if (!senhaValida)
-            {
-                ModelState.AddModelError("", "Email ou senha inválidos.");
-                return View("Index");
-            }
-
-            // Cria cookie de autenticação
+            // Cria claims do usuário
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.Email),
-                new Claim("Nome", user.Nome)
+                new Claim(ClaimTypes.Name, cliente.Nome),
+                new Claim(ClaimTypes.Email, cliente.Email),
+                new Claim("Plano", cliente.PlanoId.ToString())
             };
 
-            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
 
-            await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(claimsIdentity),
-                new AuthenticationProperties { IsPersistent = true }
-            );
+            // Grava cookie de login
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
             return RedirectToAction("Index", "Home");
         }
-
-        // Página de cadastro
-        [HttpGet]
-        [AllowAnonymous]
-        public IActionResult Register()
+        else
         {
-            return View();
+            ModelState.AddModelError("", "Senha inválida.");
+            return View("Index");
         }
+    }
 
-        // Cadastro
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(string nome, string email, string senha)
-        {
-            if (string.IsNullOrWhiteSpace(nome) ||
-                string.IsNullOrWhiteSpace(email) ||
-                string.IsNullOrWhiteSpace(senha))
-            {
-                ModelState.AddModelError("", "Todos os campos são obrigatórios.");
-                return View();
-            }
-
-            if (await _context.Users.AnyAsync(u => u.Email == email))
-            {
-                ModelState.AddModelError("", "Email já cadastrado.");
-                return View();
-            }
-
-            var senhaHash = BCrypt.Net.BCrypt.HashPassword(senha);
-
-            var user = new User
-            {
-                Nome = nome,
-                Email = email,
-                Senha = senhaHash
-            };
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            // Depois do cadastro, volta para tela de login
-            return RedirectToAction("Index", "Login");
-        }
-
-        // Logout
-        [HttpGet]
-        public async Task<IActionResult> Logout()
-        {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Index", "Login");
-        }
+    // GET: Logout
+    public async Task<IActionResult> Logout()
+    {
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        // Agora redireciona para a tela de login
+        return RedirectToAction("Index", "Login");
     }
 }

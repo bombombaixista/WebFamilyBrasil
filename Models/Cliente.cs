@@ -10,6 +10,6 @@
         public string Cargo { get; set; } = string.Empty;
         public string Origem { get; set; } = string.Empty;
         public string Observacoes { get; set; } = string.Empty;
-        public DateTime DataCadastro { get; set; }
+        public DateTime DataCadastro { get; set; } = DateTime.UtcNow;
     }
 }

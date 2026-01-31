@@ -1,0 +1,12 @@
+﻿@{
+    ViewData["Title"] = "Confirmação de Plano";
+}
+
+<div class="container text-center mt-5">
+    <h2>@ViewData["Title"]</h2>
+    <p class="lead">@TempData["Mensagem"]</p>
+
+    <a asp-controller="Login" asp-action="Index" class="btn btn-primary mt-3">
+        Ir para Login
+    </a>
+</div>

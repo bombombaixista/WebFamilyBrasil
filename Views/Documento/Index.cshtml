@@ -1,27 +1,39 @@
-﻿@model IEnumerable<MeuSistema.Models.Documento>
+﻿@model IEnumerable<Kanban.Models.Documento>
 
 @{
-    var grouped = Model
+    var documentos = Model ?? Enumerable.Empty<Kanban.Models.Documento>();
+
+
+    var grouped = documentos
         .GroupBy(d => d.Nome)
         .Select(g => new
         {
             Cliente = g.Key,
             Quantidade = g.Count(),
-            Categorias = string.Join(", ", g.Select(x => x.Categoria).Distinct()),
+            Categorias = string.Join(", ",
+                g.Select(x => x.Categoria)
+                 .Where(c => !string.IsNullOrWhiteSpace(c))
+                 .Distinct()
+            ),
             UltimoUpload = g.Max(d => d.DataUpload),
             Documentos = g.ToList()
         })
         .ToList();
 
-    var clientes = ViewBag.Clientes as List<string> ?? grouped.Select(g => g.Cliente).ToList();
-    var docsPorCliente = ViewBag.DocumentosPorCliente as List<int> ?? grouped.Select(g => g.Quantidade).ToList();
+    var clientes = (ViewBag.Clientes as List<string?> ?? grouped.Select(g => g.Cliente).ToList())
+        .Where(c => !string.IsNullOrWhiteSpace(c))
+        .Select(c => c!)
+        .ToList();
 
-    // Para gráfico de categorias
+    var docsPorCliente = ViewBag.DocumentosPorCliente as List<int>
+        ?? grouped.Select(g => g.Quantidade).ToList();
+
     var categorias = grouped
         .SelectMany(g => g.Documentos)
-        .GroupBy(d => d.Categoria)
+        .GroupBy(d => d.Categoria ?? "Sem categoria")
         .Select(g => new { Categoria = g.Key, Quantidade = g.Count() })
         .ToList();
+
     var categoriasLabels = categorias.Select(c => c.Categoria).ToList();
     var categoriasValues = categorias.Select(c => c.Quantidade).ToList();
 }
@@ -36,7 +48,7 @@
             <div class="card text-white bg-primary shadow-sm">
                 <div class="card-body py-2">
                     <h6>Total de Clientes</h6>
-                    <strong>@ViewBag.TotalClientes</strong>
+                    <strong>@(ViewBag.TotalClientes ?? grouped.Count)</strong>
                 </div>
             </div>
         </div>
@@ -44,7 +56,7 @@
             <div class="card text-white bg-success shadow-sm">
                 <div class="card-body py-2">
                     <h6>Total de Documentos</h6>
-                    <strong>@ViewBag.TotalDocumentos</strong>
+                    <strong>@(ViewBag.TotalDocumentos ?? documentos.Count())</strong>
                 </div>
             </div>
         </div>
@@ -124,6 +136,7 @@
             @foreach (var item in grouped)
             {
                 var modalId = $"modal-{item.Cliente.Replace(" ", "_")}";
+
                 <tr data-cliente="@item.Cliente"
                     data-categoria="@item.Categorias"
                     data-data="@item.UltimoUpload.ToString("yyyy-MM-dd")">
@@ -133,7 +146,11 @@
                     <td>@item.Categorias</td>
                     <td>@item.UltimoUpload.ToString("dd/MM/yyyy")</td>
                     <td>
-                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#@modalId">Abrir</button>
+                        <button class="btn btn-sm btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#@modalId">
+                            Abrir
+                        </button>
 
                         <div class="modal fade" id="@modalId" tabindex="-1">
                             <div class="modal-dialog modal-lg">
@@ -147,8 +164,15 @@
                                             @foreach (var doc in item.Documentos)
                                             {
                                                 <li class="list-group-item d-flex justify-content-between">
-                                                    <span>@System.IO.Path.GetFileName(doc.Caminho) (@doc.Categoria)</span>
-                                                    <a href="@doc.Caminho" target="_blank" class="btn btn-sm btn-outline-primary">Abrir</a>
+                                                    <span>
+                                                        @System.IO.Path.GetFileName(doc.Caminho)
+                                                        (@doc.Categoria)
+                                                    </span>
+                                                    <a href="@doc.Caminho"
+                                                       target="_blank"
+                                                       class="btn btn-sm btn-outline-primary">
+                                                        Abrir
+                                                    </a>
                                                 </li>
                                             }
                                         </ul>
@@ -172,9 +196,9 @@
     function aplicarFiltros() {
         document.querySelectorAll("#tabelaClientes tr").forEach(tr => {
             let ok = true;
-            if(filtroCliente.value && !tr.dataset.cliente.toLowerCase().includes(filtroCliente.value.toLowerCase())) ok = false;
-            if(filtroCategoria.value && !tr.dataset.categoria.toLowerCase().includes(filtroCategoria.value.toLowerCase())) ok = false;
-            if(filtroData.value && tr.dataset.data < filtroData.value) ok = false;
+            if (filtroCliente.value && !tr.dataset.cliente.toLowerCase().includes(filtroCliente.value.toLowerCase())) ok = false;
+            if (filtroCategoria.value && !tr.dataset.categoria.toLowerCase().includes(filtroCategoria.value.toLowerCase())) ok = false;
+            if (filtroData.value && tr.dataset.data < filtroData.value) ok = false;
             tr.style.display = ok ? "" : "none";
         });
     }
@@ -188,32 +212,39 @@
 
     const cores = ['#007bff', '#28a745', '#dc3545', '#ffc107', '#17a2b8', '#6f42c1', '#fd7e14', '#20c997'];
 
-    // Pizza (categorias)
     new Chart(document.getElementById('graficoPizza'), {
         type: 'pie',
         data: {
             labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(categoriasLabels)),
-            datasets: [{ data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(categoriasValues)), backgroundColor: cores }]
+            datasets: [{
+                data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(categoriasValues)),
+                backgroundColor: cores
+            }]
         },
         options: { responsive: true, maintainAspectRatio: false }
     });
 
-    // Donut (clientes)
     new Chart(document.getElementById('graficoDonut'), {
         type: 'doughnut',
         data: {
             labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(clientes)),
-            datasets: [{ data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(docsPorCliente)), backgroundColor: cores }]
+            datasets: [{
+                data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(docsPorCliente)),
+                backgroundColor: cores
+            }]
         },
         options: { responsive: true, maintainAspectRatio: false, cutout: '60%' }
     });
 
-    // Barra (documentos por cliente)
     new Chart(document.getElementById('graficoBarra'), {
         type: 'bar',
         data: {
             labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(clientes)),
-            datasets: [{ label: 'Documentos', data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(docsPorCliente)), backgroundColor: '#20c997' }]
+            datasets: [{
+                label: 'Documentos',
+                data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(docsPorCliente)),
+                backgroundColor: '#20c997'
+            }]
         },
         options: { responsive: true, maintainAspectRatio: false }
     });

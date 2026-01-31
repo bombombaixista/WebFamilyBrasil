@@ -1,0 +1,23 @@
+﻿@model IEnumerable<Kanban.Models.Cliente2>
+
+<h2>Clientes cadastrados</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Plano</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var cliente in Model)
+        {
+            <tr>
+                <td>@cliente.Nome</td>
+                <td>@cliente.Email</td>
+                <td>@cliente.PlanoId</td>
+            </tr>
+        }
+    </tbody>
+</table>

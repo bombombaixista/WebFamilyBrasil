@@ -1,0 +1,125 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using WebFamily.Models;
+using Microsoft.AspNetCore.Authorization;
+using System.Text.Json;
+using System.Security.Claims;
+
+namespace WebFamily.Controllers
+{
+    [Authorize]
+    [Route("Pedidos")]
+    public class PedidosController : Controller
+    {
+        private readonly IWebHostEnvironment _env;
+        private readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.Web);
+
+        public PedidosController(IWebHostEnvironment env)
+        {
+            _env = env;
+        }
+
+        // =========================
+        // Helpers para pasta do usuário
+        // =========================
+        private string GetUserDataPath()
+        {
+            var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(email))
+                throw new Exception("Usuário não logado.");
+
+            var folderName = email.Replace("@", "_").Replace(".", "_");
+            var userPath = Path.Combine(_env.ContentRootPath, "Data", "User2", folderName);
+
+            if (!Directory.Exists(userPath))
+                Directory.CreateDirectory(userPath);
+
+            return userPath;
+        }
+
+        private string GetPedidosFilePath()
+        {
+            return Path.Combine(GetUserDataPath(), "pedidos.json");
+        }
+
+        private List<PedidoDto> GetPedidos()
+        {
+            var path = GetPedidosFilePath();
+            if (!System.IO.File.Exists(path)) return new List<PedidoDto>();
+            var json = System.IO.File.ReadAllText(path);
+            return JsonSerializer.Deserialize<List<PedidoDto>>(json, _jsonOptions) ?? new List<PedidoDto>();
+        }
+
+        private void SalvarPedidos(List<PedidoDto> pedidos)
+        {
+            var path = GetPedidosFilePath();
+            var json = JsonSerializer.Serialize(pedidos, _jsonOptions);
+            System.IO.File.WriteAllText(path, json);
+        }
+
+        // =========================
+        // INDEX
+        // =========================
+        [HttpGet("")]
+        [HttpGet("Index")]
+        public IActionResult Index(string cliente, string origem, string status)
+        {
+            var pedidos = GetPedidos().AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(cliente))
+                pedidos = pedidos.Where(p => p.Cliente.Contains(cliente, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrWhiteSpace(origem))
+                pedidos = pedidos.Where(p => p.Origem == origem);
+
+            if (!string.IsNullOrWhiteSpace(status))
+                pedidos = pedidos.Where(p => p.Status == status);
+
+            return View(pedidos.ToList());
+        }
+
+        // =========================
+        // DETALHES
+        // =========================
+        [HttpGet("Detalhes/{id}")]
+        public IActionResult Detalhes(long id) => View(GetPedidos().FirstOrDefault(p => p.Id == id));
+
+        // =========================
+        // ATUALIZAR STATUS
+        // =========================
+        [HttpGet("AtualizarStatus/{id}")]
+        public IActionResult AtualizarStatus(long id) => View(GetPedidos().FirstOrDefault(p => p.Id == id));
+
+        [HttpPost("AtualizarStatus/{id}")]
+        public IActionResult AtualizarStatus(long id, string status)
+        {
+            var pedidos = GetPedidos();
+            var pedido = pedidos.FirstOrDefault(p => p.Id == id);
+            if (pedido != null)
+            {
+                pedido.Status = status;
+                SalvarPedidos(pedidos);
+            }
+            return RedirectToAction("Index");
+        }
+
+        // =========================
+        // IMPRIMIR ETIQUETA
+        // =========================
+        [HttpGet("ImprimirEtiqueta/{id}")]
+        public IActionResult ImprimirEtiqueta(long id) => View(GetPedidos().FirstOrDefault(p => p.Id == id));
+
+        // =========================
+        // ADICIONAR PEDIDO (API)
+        // =========================
+        [HttpPost("Adicionar")]
+        public IActionResult Adicionar([FromBody] PedidoDto pedido)
+        {
+            var pedidos = GetPedidos();
+            pedido.Id = pedidos.Count > 0 ? pedidos.Max(p => p.Id) + 1 : 1;
+            pedido.Data = DateTime.Now;
+            pedidos.Add(pedido);
+            SalvarPedidos(pedidos);
+            return Ok(pedido);
+        }
+    }
+}

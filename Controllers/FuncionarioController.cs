@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using System.Security.Claims;
 
 namespace Kanban.Controllers
 {
@@ -9,28 +10,50 @@ namespace Kanban.Controllers
     [Route("[controller]")]
     public class FuncionarioController : Controller
     {
-        private readonly string _dataPath;
+        private readonly IWebHostEnvironment _env;
         private readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.Web);
 
         public FuncionarioController(IWebHostEnvironment env)
         {
-            _dataPath = Path.Combine(env.ContentRootPath, "Data");
-            Directory.CreateDirectory(_dataPath);
+            _env = env;
         }
 
-        private string JsonFile => Path.Combine(_dataPath, "funcionarios.json");
+        // =========================
+        // Helpers para pasta do usuário
+        // =========================
+        private string GetUserDataPath()
+        {
+            var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(email))
+                throw new Exception("Usuário não logado.");
+
+            var folderName = email.Replace("@", "_").Replace(".", "_");
+            var userPath = Path.Combine(_env.ContentRootPath, "Data", "User2", folderName);
+
+            if (!Directory.Exists(userPath))
+                Directory.CreateDirectory(userPath);
+
+            return userPath;
+        }
+
+        private string GetFuncionariosFilePath()
+        {
+            return Path.Combine(GetUserDataPath(), "funcionarios.json");
+        }
 
         private List<Funcionario> LerFuncionarios()
         {
-            if (!System.IO.File.Exists(JsonFile)) return new List<Funcionario>();
-            var json = System.IO.File.ReadAllText(JsonFile);
+            var path = GetFuncionariosFilePath();
+            if (!System.IO.File.Exists(path)) return new List<Funcionario>();
+            var json = System.IO.File.ReadAllText(path);
             return JsonSerializer.Deserialize<List<Funcionario>>(json, _jsonOptions) ?? new List<Funcionario>();
         }
 
         private void SalvarFuncionarios(List<Funcionario> funcionarios)
         {
+            var path = GetFuncionariosFilePath();
             var json = JsonSerializer.Serialize(funcionarios, _jsonOptions);
-            System.IO.File.WriteAllText(JsonFile, json);
+            System.IO.File.WriteAllText(path, json);
         }
 
         // ===================== PÁGINAS =====================

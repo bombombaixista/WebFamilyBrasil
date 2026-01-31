@@ -2,105 +2,61 @@
     ViewData["Title"] = "Planos WebFamily";
 }
 
-<section class="planos py-5" style="background:#f8f9fa;">
+<section class="planos py-5">
     <div class="container">
         <h2 class="text-center mb-5 fw-bold">Escolha o Plano do WebFamily</h2>
-
         <div class="row g-4 justify-content-center">
 
-            <!-- BÁSICO -->
+            <!-- PLANO C (Básico) -->
             <div class="col-md-4">
                 <div class="card shadow-sm border-0 h-100 plano-card">
                     <div class="card-header text-center bg-success text-white">
                         <h4>Básico</h4>
-                        <small>Para começar a organizar</small>
                     </div>
-
-                    <div class="card-body">
-                        <ul class="list-unstyled mb-4">
-                            <li>✅ Pipeline de Vendas</li>
-                            <li>✅ Cadastro de Clientes</li>
-                            <li>✅ Agenda / Calendário</li>
-                            <li>✅ Relatórios básicos</li>
-                            <li>❌ Organizador de Tarefas</li>
-                            <li>❌ Estoque e Produtos</li>
-                            <li>❌ Financeiro</li>
-                            <li>❌ Fornecedores</li>
-                            <li>❌ Funcionários</li>
-                        </ul>
-
-                        <h3 class="text-center mb-3">R$ 49 / mês</h3>
-
-                        <div class="d-grid">
-                            <a href="#" class="btn btn-success btn-lg">
-                                Teste grátis 14 dias
-                            </a>
-                        </div>
+                    <div class="card-body text-center">
+                        <form asp-controller="Venda" asp-action="EscolherPlano" method="post">
+                            <input type="hidden" name="Nome" value="@User.Identity?.Name" />
+                            <input type="hidden" name="Email" value="@User.Identity?.Name" />
+                            <input type="hidden" name="Plano" value="C" /> <!-- Código do plano -->
+                            <input type="hidden" name="Expiracao" value="@DateTime.Now.AddMonths(1).ToString("yyyy-MM-dd")" />
+                            <button type="submit" class="btn btn-success btn-lg">Escolher Básico</button>
+                        </form>
                     </div>
                 </div>
             </div>
 
-            <!-- PROFISSIONAL -->
+            <!-- PLANO B (Profissional) -->
             <div class="col-md-4">
-                <div class="card shadow-lg border-0 h-100 plano-card popular">
-                    <div class="ribbon">Mais Popular</div>
-
+                <div class="card shadow-sm border-0 h-100 plano-card">
                     <div class="card-header text-center bg-primary text-white">
                         <h4>Profissional</h4>
-                        <small>Para empresas em crescimento</small>
                     </div>
-
-                    <div class="card-body">
-                        <ul class="list-unstyled mb-4">
-                            <li>✅ Pipeline de Vendas</li>
-                            <li>✅ Cadastro de Clientes</li>
-                            <li>✅ Agenda / Calendário</li>
-                            <li>✅ Controle de Estoque e Produtos</li>
-                            <li>✅ Controle Financeiro</li>
-                            <li>✅ Cadastro de Fornecedores</li>
-                            <li>✅ Relatórios avançados</li>
-                            <li>❌ Organizador de Tarefas</li>
-                            <li>❌ Cadastro de Funcionários</li>
-                        </ul>
-
-                        <h3 class="text-center mb-3">R$ 79 / mês</h3>
-
-                        <div class="d-grid">
-                            <a href="#" class="btn btn-primary btn-lg">
-                                Teste grátis 14 dias
-                            </a>
-                        </div>
+                    <div class="card-body text-center">
+                        <form asp-controller="Venda" asp-action="EscolherPlano" method="post">
+                            <input type="hidden" name="Nome" value="@User.Identity?.Name" />
+                            <input type="hidden" name="Email" value="@User.Identity?.Name" />
+                            <input type="hidden" name="Plano" value="B" />
+                            <input type="hidden" name="Expiracao" value="@DateTime.Now.AddMonths(1).ToString("yyyy-MM-dd")" />
+                            <button type="submit" class="btn btn-primary btn-lg">Escolher Profissional</button>
+                        </form>
                     </div>
                 </div>
             </div>
 
-            <!-- EMPRESARIAL -->
+            <!-- PLANO A (Empresarial) -->
             <div class="col-md-4">
                 <div class="card shadow-sm border-0 h-100 plano-card">
                     <div class="card-header text-center bg-warning text-dark">
                         <h4>Empresarial</h4>
-                        <small>Gestão completa da empresa</small>
                     </div>
-
-                    <div class="card-body">
-                        <ul class="list-unstyled mb-4">
-                            <li>✅ Tudo do Profissional</li>
-                            <li>✅ Organizador de Tarefas</li>
-                            <li>✅ Cadastro de Fornecedores</li>
-                            <li>✅ Cadastro de Funcionários</li>
-                            <li>✅ Permissões por usuário</li>
-                            <li>✅ Relatórios gerenciais</li>
-                            <li>✅ Dashboards avançados</li>
-                            <li>✅ Suporte prioritário</li>
-                        </ul>
-
-                        <h3 class="text-center mb-3">R$ 119 / mês</h3>
-
-                        <div class="d-grid">
-                            <a href="#" class="btn btn-warning text-dark btn-lg">
-                                Teste grátis 14 dias
-                            </a>
-                        </div>
+                    <div class="card-body text-center">
+                        <form asp-controller="Venda" asp-action="EscolherPlano" method="post">
+                            <input type="hidden" name="Nome" value="@User.Identity?.Name" />
+                            <input type="hidden" name="Email" value="@User.Identity?.Name" />
+                            <input type="hidden" name="Plano" value="A" />
+                            <input type="hidden" name="Expiracao" value="@DateTime.Now.AddMonths(1).ToString("yyyy-MM-dd")" />
+                            <button type="submit" class="btn btn-warning btn-lg">Escolher Empresarial</button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -108,57 +64,3 @@
         </div>
     </div>
 </section>
-
-<style>
-    .planos h2 {
-        font-weight: 700;
-    }
-
-    .plano-card {
-        position: relative;
-        transition: transform .3s, box-shadow .3s;
-    }
-
-        .plano-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0,0,0,.2);
-        }
-
-        .plano-card ul li {
-            margin-bottom: .6rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: .5rem;
-        }
-
-    .ribbon {
-        width: 140px;
-        height: 32px;
-        background: #ffc107;
-        color: #212529;
-        font-weight: 600;
-        text-align: center;
-        line-height: 32px;
-        position: absolute;
-        top: -16px;
-        left: 50%;
-        transform: translateX(-50%) rotate(-10deg);
-        box-shadow: 0 3px 6px rgba(0,0,0,.15);
-        z-index: 10;
-        border-radius: 4px;
-    }
-
-    .popular {
-        border: 2px solid #0d6efd;
-    }
-
-    .plano-card h3 {
-        font-weight: 700;
-    }
-
-    .plano-card .btn-lg {
-        font-weight: 600;
-        font-size: 1rem;
-    }
-</style>

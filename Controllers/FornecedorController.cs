@@ -2,21 +2,43 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using System.Security.Claims;
 
 namespace Kanban.Controllers
 {
     [Authorize]
-
     [Route("[controller]")]
     public class FornecedorController : Controller
     {
-        private readonly string _dataPath;
+        private readonly IWebHostEnvironment _env;
         private readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.Web);
 
         public FornecedorController(IWebHostEnvironment env)
         {
-            _dataPath = Path.Combine(env.ContentRootPath, "Data");
-            Directory.CreateDirectory(_dataPath);
+            _env = env;
+        }
+
+        // =========================
+        // Helpers para pasta do usuário
+        // =========================
+        private string GetUserDataPath()
+        {
+            var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(email))
+                throw new Exception("Usuário não logado.");
+
+            var folderName = email.Replace("@", "_").Replace(".", "_");
+            var userPath = Path.Combine(_env.ContentRootPath, "Data", "User2", folderName);
+
+            if (!Directory.Exists(userPath))
+                Directory.CreateDirectory(userPath);
+
+            return userPath;
+        }
+
+        private string GetFornecedoresFilePath()
+        {
+            return Path.Combine(GetUserDataPath(), "fornecedores.json");
         }
 
         // Página: GET /Fornecedor
@@ -30,7 +52,7 @@ namespace Kanban.Controllers
         [HttpGet("Listar")]
         public IActionResult Listar()
         {
-            var path = Path.Combine(_dataPath, "fornecedores.json");
+            var path = GetFornecedoresFilePath();
             if (!System.IO.File.Exists(path)) return Ok(new List<Fornecedor>());
 
             var json = System.IO.File.ReadAllText(path);
@@ -42,7 +64,7 @@ namespace Kanban.Controllers
         [HttpPost("Adicionar")]
         public IActionResult Adicionar([FromBody] Fornecedor fornecedor)
         {
-            var path = Path.Combine(_dataPath, "fornecedores.json");
+            var path = GetFornecedoresFilePath();
             var fornecedores = System.IO.File.Exists(path)
                 ? JsonSerializer.Deserialize<List<Fornecedor>>(System.IO.File.ReadAllText(path), _jsonOptions) ?? new List<Fornecedor>()
                 : new List<Fornecedor>();
@@ -58,7 +80,7 @@ namespace Kanban.Controllers
         [HttpPut("Editar/{id}")]
         public IActionResult Editar(int id, [FromBody] Fornecedor fornecedorAtualizado)
         {
-            var path = Path.Combine(_dataPath, "fornecedores.json");
+            var path = GetFornecedoresFilePath();
             if (!System.IO.File.Exists(path)) return NotFound();
 
             var json = System.IO.File.ReadAllText(path);
@@ -81,7 +103,7 @@ namespace Kanban.Controllers
         [HttpDelete("Apagar/{id}")]
         public IActionResult Apagar(int id)
         {
-            var path = Path.Combine(_dataPath, "fornecedores.json");
+            var path = GetFornecedoresFilePath();
             if (!System.IO.File.Exists(path)) return NotFound();
 
             var json = System.IO.File.ReadAllText(path);

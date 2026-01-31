@@ -1,159 +1,43 @@
 ﻿@{
     ViewData["Title"] = "Cadastro";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container mt-4">
-    <h2 class="mb-4 text-center">📊 Cadastro de Clientes</h2>
-    <div class="card shadow-lg border-0 w-100"
-         style="max-width:420px;">
-
-        <!-- HEADER -->
-        <div class="card-header text-center text-white"
-             style="background: linear-gradient(135deg,#0d6efd,#198754);">
-            <h4 class="mb-0">📝 Criar Conta</h4>
-            <small>Preencha os dados para se cadastrar</small>
+<div class="d-flex align-items-center justify-content-center vh-100 bg-light">
+    <div class="card shadow-lg p-5" style="max-width: 600px; width: 100%;">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold text-success">Criar Conta</h2>
+            <p class="text-muted">Preencha os dados para se cadastrar</p>
         </div>
 
-        <!-- BODY -->
-        <div class="card-body p-4">
-
-            <form asp-action="Register" method="post" id="formCadastro">
-                @Html.AntiForgeryToken()
-
-                <div class="mb-3">
-                    <label class="form-label">Nome</label>
-                    <input type="text"
-                           name="nome"
-                           class="form-control"
-                           placeholder="Seu nome completo"
-                           required />
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Email</label>
-                    <input type="email"
-                           name="email"
-                           class="form-control"
-                           placeholder="seu@email.com"
-                           required />
-                </div>
-
-                <div class="mb-3 position-relative">
-                    <label class="form-label">Senha</label>
-                    <input type="password"
-                           name="senha"
-                           class="form-control"
-                           placeholder="••••••••"
-                           required
-                           id="senhaInput" />
-                    <button type="button" class="btn btn-sm btn-outline-secondary position-absolute top-50 end-0 translate-middle-y me-2"
-                            id="toggleSenha">
-                        👁️
-                    </button>
-                </div>
-
-                <div class="d-grid mt-4">
-                    <button type="submit"
-                            class="btn btn-success btn-lg"
-                            id="btnCadastrar">
-                        🚀 Cadastrar
-                    </button>
-                </div>
-            </form>
-
-            <!-- ERROS -->
-            <div id="erroContainer" class="alert alert-danger mt-3 mb-0 d-none">
-                <ul class="mb-0 ps-3" id="erroList"></ul>
+        <form asp-controller="Cadastro" asp-action="Index" method="post">
+            @Html.AntiForgeryToken()
+            <div class="mb-3">
+                <label class="form-label">Nome completo</label>
+                <input type="text" name="nome" class="form-control" placeholder="Digite seu nome" required />
             </div>
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-control" placeholder="Digite seu email" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Senha</label>
+                <input type="password" name="senha" class="form-control" placeholder="Crie uma senha" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Confirmar senha</label>
+                <input type="password" name="confirmarSenha" class="form-control" placeholder="Repita a senha" required />
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-success btn-lg">Cadastrar</button>
+            </div>
+        </form>
 
-        <!-- FOOTER -->
-        <div class="card-footer text-center bg-light">
-            <small class="text-muted">
-                Já possui conta?
-                <a asp-action="Login" class="fw-bold text-decoration-none text-primary">
-                    Entrar
-                </a>
-            </small>
+        <div class="text-center mt-4">
+            <span class="text-muted">Já tem conta?</span><br />
+            <a asp-controller="Login" asp-action="Index" class="btn btn-outline-primary mt-2">
+                Voltar para o Login
+            </a>
         </div>
-
     </div>
 </div>
-
-@section Styles {
-    <style>
-        .form-control:focus {
-            border-color: #198754;
-            box-shadow: 0 0 0 .15rem rgba(25,135,84,.25);
-        }
-
-        #toggleSenha {
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            padding: 0 5px;
-        }
-
-            #toggleSenha:hover {
-                color: #198754;
-            }
-
-        .btn-lg {
-            box-shadow: 0 4px 12px rgba(25,135,84,0.45);
-        }
-
-        #erroContainer {
-            transition: all 0.3s ease;
-        }
-    </style>
-}
-
-@section Scripts {
-    <script>
-        // Toggle mostrar/ocultar senha
-        const senhaInput = document.getElementById("senhaInput");
-        const toggleSenha = document.getElementById("toggleSenha");
-
-        toggleSenha.addEventListener("click", () => {
-            if (senhaInput.type === "password") {
-                senhaInput.type = "text";
-                toggleSenha.textContent = "🙈";
-            } else {
-                senhaInput.type = "password";
-                toggleSenha.textContent = "👁️";
-            }
-        });
-
-        // Validação antes do submit
-        const form = document.getElementById("formCadastro");
-        const btnCadastrar = document.getElementById("btnCadastrar");
-        const erroContainer = document.getElementById("erroContainer");
-        const erroList = document.getElementById("erroList");
-
-        form.addEventListener("submit", (e) => {
-            erroList.innerHTML = "";
-            erroContainer.classList.add("d-none");
-
-            const nome = form.nome.value.trim();
-            const email = form.email.value.trim();
-            const senha = form.senha.value.trim();
-            const erros = [];
-
-            if (!nome) erros.push("O campo Nome é obrigatório.");
-            if (!email) erros.push("O campo Email é obrigatório.");
-            if (!senha) erros.push("O campo Senha é obrigatório.");
-            if (senha && senha.length < 6) erros.push("A senha deve ter pelo menos 6 caracteres.");
-
-            if (erros.length) {
-                e.preventDefault();
-                erros.forEach(err => {
-                    const li = document.createElement("li");
-                    li.textContent = err;
-                    erroList.appendChild(li);
-                });
-                erroContainer.classList.remove("d-none");
-                window.scrollTo({ top: 0, behavior: "smooth" });
-            }
-        });
-    </script>
-}

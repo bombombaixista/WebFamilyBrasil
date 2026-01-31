@@ -1,7 +1,7 @@
 ﻿using Kanban.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Kanban.Data
+namespace Kanban.Model
 {
     public class SalesPipelineContext : DbContext
     {

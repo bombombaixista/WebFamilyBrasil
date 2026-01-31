@@ -1,35 +1,53 @@
-﻿@{
-    ViewData["Title"] = "Login";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-}
+﻿@model Kanban.Models.Cliente2
 
-<div class="d-flex align-items-center justify-content-center vh-100 bg-light">
-    <div class="card shadow-lg p-5" style="max-width: 500px; width: 100%;">
-        <div class="text-center mb-4">
-            <h2 class="fw-bold text-primary">Bem-vindo!</h2>
-            <p class="text-muted">Entre com sua conta para continuar</p>
-        </div>
-
-        <form asp-controller="Login" asp-action="Login" method="post">
-            @Html.AntiForgeryToken()
-            <div class="mb-3">
-                <label class="form-label">Email</label>
-                <input type="email" name="email" class="form-control" placeholder="Digite seu email" required />
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Senha</label>
-                <input type="password" name="senha" class="form-control" placeholder="Digite sua senha" required />
-            </div>
-            <div class="d-grid">
-                <button type="submit" class="btn btn-primary btn-lg">Entrar</button>
-            </div>
-        </form>
-
-        <div class="text-center mt-4">
-            <span class="text-muted">Ainda não tem conta?</span><br />
-            <a asp-controller="Login" asp-action="Register" class="btn btn-outline-secondary mt-2">
-                Criar cadastro
-            </a>
-        </div>
+<h2>Login</h2>
+<form asp-action="Login" method="post">
+    <div class="form-group">
+        <label for="email">Email</label>
+        <input type="text" name="email" class="form-control" />
     </div>
-</div>
+
+    <div class="form-group">
+        <label for="senha">Senha</label>
+        <input type="password" name="senha" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Entrar</button>
+</form>
+
+<hr />
+
+<h2>Cadastrar Cliente</h2>
+<form asp-action="Cadastrar" method="post">
+    <div class="form-group">
+        <label asp-for="Nome"></label>
+        <input asp-for="Nome" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Email"></label>
+        <input asp-for="Email" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="senha">Senha</label>
+        <input type="password" name="senha" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="PlanoId">Plano</label>
+        <select asp-for="PlanoId" asp-items="ViewBag.Planos" class="form-control"></select>
+    </div>
+
+    <button type="submit" class="btn btn-success">Cadastrar</button>
+</form>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <p>@error.ErrorMessage</p>
+        }
+    </div>
+}

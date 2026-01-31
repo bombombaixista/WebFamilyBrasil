@@ -1,0 +1,41 @@
+﻿@{
+    ViewData["Title"] = "WebFamilyBrasil - Bem-vindo";
+}
+
+<div class="container text-center mt-5">
+    <h1 class="mb-3">Bem-vindo à WebFamilyBrasil</h1>
+    <p class="lead mb-5">Organize tarefas, pipeline de vendas, e-commerce, agenda e muito mais!</p>
+
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+        <!-- Botão para página de planos -->
+        <a asp-controller="Venda" asp-action="Index" class="btn btn-primary btn-lg">
+            Ver Planos
+        </a>
+
+        <!-- Botão para página de login -->
+        <a asp-controller="Login" asp-action="Index" class="btn btn-outline-secondary btn-lg">
+            Já sou cliente
+        </a>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-4 mb-3">
+            <div class="card bg-light text-dark p-3 h-100">
+                <h5>Pipeline de Vendas</h5>
+                <p>Controle seus negócios de forma eficiente.</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card bg-light text-dark p-3 h-100">
+                <h5>Organizador de Tarefas</h5>
+                <p>Gerencie suas atividades e prazos com facilidade.</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card bg-light text-dark p-3 h-100">
+                <h5>E-commerce Integrado</h5>
+                <p>Venda online e acompanhe pedidos em tempo real.</p>
+            </div>
+        </div>
+    </div>
+</div>

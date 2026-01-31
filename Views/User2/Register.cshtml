@@ -1,0 +1,54 @@
+﻿@{
+    ViewData["Title"] = "Cadastro de Usuário";
+}
+
+<h2 class="text-center mb-4">Cadastro</h2>
+
+@if (TempData["Mensagem"] != null)
+{
+    <div class="alert alert-success">@TempData["Mensagem"]</div>
+}
+
+<form asp-controller="User2" asp-action="Register" method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label for="Nome" class="form-label">Nome</label>
+        <input type="text" class="form-control" id="Nome" name="Nome"
+               value="@ViewBag.Nome" placeholder="Digite seu nome" required />
+    </div>
+
+    <div class="mb-3">
+        <label for="Email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="Email" name="Email"
+               value="@ViewBag.Email" placeholder="Digite seu email" required />
+    </div>
+
+    <div class="mb-3">
+        <label for="Senha" class="form-label">Senha</label>
+        <input type="password" class="form-control" id="Senha" name="Senha"
+               placeholder="Digite sua senha" required />
+    </div>
+
+    <div class="mb-3">
+        <label for="ConfirmarSenha" class="form-label">Confirmar Senha</label>
+        <input type="password" class="form-control" id="ConfirmarSenha" name="ConfirmarSenha"
+               placeholder="Confirme sua senha" required />
+    </div>
+
+    <!-- Campos ocultos: Plano e Expiracao -->
+    <input type="hidden" name="Plano" value="@ViewBag.Plano" />
+    <input type="hidden" name="Expiracao" value="@ViewBag.Expiracao" />
+
+    <button type="submit" class="btn btn-primary w-100">Cadastrar</button>
+</form>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger mt-3">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <div>@error.ErrorMessage</div>
+        }
+    </div>
+}

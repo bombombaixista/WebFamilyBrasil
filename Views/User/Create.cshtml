@@ -1,0 +1,54 @@
+﻿@{
+    ViewData["Title"] = "Cadastro de Cliente";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="d-flex align-items-center justify-content-center vh-100 bg-light">
+    <div class="card shadow-lg p-5" style="max-width: 600px; width: 100%;">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold text-success">Criar Conta de Cliente</h2>
+            <p class="text-muted">Preencha os dados para se cadastrar</p>
+        </div>
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger">@ViewBag.Error</div>
+        }
+        else if (TempData["Mensagem"] != null)
+        {
+            <div class="alert alert-success">@TempData["Mensagem"]</div>
+        }
+
+        <form asp-controller="User" asp-action="Register" method="post">
+            @Html.AntiForgeryToken()
+            <div class="mb-3">
+                <label class="form-label">Nome completo</label>
+                <input type="text" name="Nome" class="form-control" placeholder="Digite seu nome" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" name="Email" class="form-control" placeholder="Digite seu email" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Senha</label>
+                <input type="password" name="Senha" class="form-control" placeholder="Crie uma senha" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Confirmar senha</label>
+                <input type="password" name="confirmarSenha" class="form-control" placeholder="Repita a senha" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Plano</label>
+                <select name="Plano" class="form-select" required>
+                    <option value="">Selecione o plano</option>
+                    <option value="Basico">Básico</option>
+                    <option value="Premium">Premium</option>
+                    <option value="Pro">Pro</option>
+                </select>
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-success btn-lg">Cadastrar</button>
+            </div>
+        </form>
+    </div>
+</div>
