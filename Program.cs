@@ -17,23 +17,22 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     )
 );
 
+// ==========================
+// HttpClient (para serviços externos)
+// ==========================
 builder.Services.AddHttpClient();
-builder.Services.AddScoped<MercadoLivreTokenService>();
 
+// ==========================
+// Serviços customizados
+// ==========================
+builder.Services.AddScoped<MercadoLivreTokenService>();
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<MercadoPagoService>(); // ✅ registra o service do Mercado Pago
 
 // ==========================
 // MVC
 // ==========================
 builder.Services.AddControllersWithViews();
-
-// ==========================
-// HttpClient (para serviços externos)
-// ==========================
-
-// ==========================
-// Serviços customizados
-// ==========================
-builder.Services.AddScoped<UserService>();
 
 // ==========================
 // Session
@@ -50,13 +49,13 @@ builder.Services.AddSession(options =>
 // Cookie Authentication
 // ==========================
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-.AddCookie(options =>
-{
-    options.LoginPath = "/Login/Index";        // fluxo ajustado
-    options.AccessDeniedPath = "/Login/Index"; // fluxo ajustado
-    options.ExpireTimeSpan = TimeSpan.FromHours(2);
-    options.SlidingExpiration = true;
-});
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Login/Index";        // fluxo ajustado
+        options.AccessDeniedPath = "/Login/Index"; // fluxo ajustado
+        options.ExpireTimeSpan = TimeSpan.FromHours(2);
+        options.SlidingExpiration = true;
+    });
 
 // ==========================
 // APP
@@ -85,7 +84,6 @@ app.UseAuthorization();
 // ==========================
 // ROTAS
 // ==========================
-// Agora o fluxo padrão já aponta para Landing/Index
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Cliente2}/{action=Cadastrar}/{id?}");
