@@ -16,7 +16,8 @@ namespace WebFamily.Controllers
         // Configure no appsettings.json
         private readonly string _clientId = "SEU_CLIENT_ID";
         private readonly string _clientSecret = "SEU_CLIENT_SECRET";
-        private readonly string _redirectUri = "https://seusite.com/api/MercadoLivreAuth/callback";
+        private readonly string _redirectUri = "https://webfamilybrasil-production.up.railway.app/api/MercadoLivreAuth/callback";
+
 
         public MercadoLivreAuthController(IHttpClientFactory httpClientFactory, MercadoLivreTokenService tokenService)
         {
