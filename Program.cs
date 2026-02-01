@@ -1,8 +1,9 @@
 ﻿using Kanban.Model;
 using Kanban.Services;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
+using WebFamily.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     )
 );
 
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<MercadoLivreTokenService>();
+
+
 // ==========================
 // MVC
 // ==========================
@@ -24,7 +29,6 @@ builder.Services.AddControllersWithViews();
 // ==========================
 // HttpClient (para serviços externos)
 // ==========================
-builder.Services.AddHttpClient();
 
 // ==========================
 // Serviços customizados
