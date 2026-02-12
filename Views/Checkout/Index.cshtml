@@ -1,0 +1,44 @@
+﻿@{
+    ViewData["Title"] = "Checkout";
+}
+
+<h2>Escolha seu Plano</h2>
+
+<div class="container">
+    <div class="row">
+
+        <!-- Plano Básico -->
+        <div class="col-md-4 text-center">
+            <h4>Básico</h4>
+            <p>R$ 79,90/mês</p>
+            <script src="https://www.mercadopago.com.br/integrations/v1/web-payment-checkout.js"
+                    data-preference-id="3134918415-62261764-5825-49a6-872f-62031d2c625a"
+                    data-source="button">
+            </script>
+        </div>
+
+        <!-- Plano Profissional -->
+        <div class="col-md-4 text-center">
+            <h4>Profissional</h4>
+            <p>R$ 99,90/mês</p>
+            <script src="https://www.mercadopago.com.br/integrations/v1/web-payment-checkout.js"
+                    data-preference-id="3134918415-b89b3561-c44a-46ff-973c-541facdfb641"
+                    data-source="button">
+            </script>
+        </div>
+
+        <!-- Plano Empresarial -->
+        <div class="col-md-4 text-center">
+            <h4>Empresarial</h4>
+            <p>R$ 119,90/mês</p>
+            <script src="https://www.mercadopago.com.br/integrations/v1/web-payment-checkout.js"
+                    data-preference-id="3134918415-2b9b342c-b500-4c24-8fbc-b325df0fedcf"
+                    data-source="button">
+            </script>
+        </div>
+
+    </div>
+</div>
+
+<hr />
+

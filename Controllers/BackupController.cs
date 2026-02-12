@@ -1,5 +1,4 @@
-﻿using Kanban.Services;
-using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -15,28 +14,27 @@ namespace Kanban.Controllers
     public class BackupController : Controller
     {
         private readonly string _baseDataPath;
-        private readonly UserService _userService;
 
-        public BackupController(IWebHostEnvironment env, UserService userService)
+        public BackupController(IWebHostEnvironment env)
         {
             _baseDataPath = Path.Combine(env.ContentRootPath, "Data");
             Directory.CreateDirectory(_baseDataPath);
-            _userService = userService;
         }
 
         // =========================
-        // Helpers
+        // Helper – caminho do usuário
         // =========================
         private string GetUserDataPath()
         {
             var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            if (string.IsNullOrEmpty(email))
-                throw new Exception("Usuário não logado.");
 
-            // 🔹 Normaliza o email para nome de pasta
-            var folderName = email.Replace("@", "_").Replace(".", "_");
+            if (string.IsNullOrWhiteSpace(email))
+                throw new Exception("Usuário não autenticado.");
 
-            // 🔹 Estrutura correta: Kanban/Data/User2/<email>
+            var folderName = email
+                .Replace("@", "_")
+                .Replace(".", "_");
+
             var userPath = Path.Combine(_baseDataPath, "User2", folderName);
 
             if (!Directory.Exists(userPath))
@@ -46,45 +44,57 @@ namespace Kanban.Controllers
         }
 
         // =========================
-        // Página principal
+        // Tela principal
         // =========================
         [HttpGet("")]
         [HttpGet("Index")]
         public IActionResult Index()
         {
             var userPath = GetUserDataPath();
-            var arquivos = Directory.GetFiles(userPath)
+
+            var arquivosJson = Directory
+                .GetFiles(userPath, "*.json")
                 .Select(Path.GetFileName)
-                .Where(f => f != null)
                 .ToList();
 
-            return View(arquivos); // precisa criar Views/Backup/Index.cshtml
+            return View(arquivosJson);
         }
 
         // =========================
-        // Exportar tudo (ZIP)
+        // EXPORTAR – SOMENTE JSON
         // =========================
         [HttpGet("ExportarTudo")]
         public IActionResult ExportarTudo()
         {
             var userPath = GetUserDataPath();
-            var arquivos = Directory.GetFiles(userPath);
+            var arquivosJson = Directory.GetFiles(userPath, "*.json");
 
-            if (arquivos.Length == 0)
-                return BadRequest($"Nenhum arquivo encontrado em {userPath}");
+            if (!arquivosJson.Any())
+                return BadRequest("Nenhum arquivo JSON encontrado para backup.");
 
-            var nomeArquivo = $"backup_{DateTime.Now:yyyyMMdd_HHmm}.zip";
-            var zipPath = Path.Combine(Path.GetTempPath(), nomeArquivo);
+            var nomeZip = $"backup_{DateTime.Now:yyyyMMdd_HHmm}.zip";
+            var zipTemp = Path.Combine(Path.GetTempPath(), nomeZip);
 
-            ZipFile.CreateFromDirectory(userPath, zipPath);
-            var bytes = System.IO.File.ReadAllBytes(zipPath);
-            System.IO.File.Delete(zipPath);
+            using (var zip = ZipFile.Open(zipTemp, ZipArchiveMode.Create))
+            {
+                foreach (var arquivo in arquivosJson)
+                {
+                    zip.CreateEntryFromFile(
+                        arquivo,
+                        Path.GetFileName(arquivo),
+                        CompressionLevel.Optimal
+                    );
+                }
+            }
 
-            return File(bytes, "application/zip", nomeArquivo);
+            var bytes = System.IO.File.ReadAllBytes(zipTemp);
+            System.IO.File.Delete(zipTemp);
+
+            return File(bytes, "application/zip", nomeZip);
         }
 
         // =========================
-        // Importar tudo (ZIP)
+        // IMPORTAR – SOMENTE JSON
         // =========================
         [HttpPost("ImportarTudo")]
         public IActionResult ImportarTudo(IFormFile arquivo)
@@ -93,32 +103,45 @@ namespace Kanban.Controllers
                 return BadRequest("Nenhum arquivo enviado.");
 
             var userPath = GetUserDataPath();
-            var tempZip = Path.Combine(Path.GetTempPath(), $"import_{Guid.NewGuid()}.zip");
+            var tempZip = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.zip");
 
             using (var stream = new FileStream(tempZip, FileMode.Create))
             {
                 arquivo.CopyTo(stream);
             }
 
-            ZipFile.ExtractToDirectory(tempZip, userPath, overwriteFiles: true);
+            using (var zip = ZipFile.OpenRead(tempZip))
+            {
+                foreach (var entry in zip.Entries)
+                {
+                    // 🔒 BLOQUEIO TOTAL: só aceita JSON
+                    if (!entry.FullName.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    var destino = Path.Combine(userPath, entry.Name);
+                    entry.ExtractToFile(destino, overwrite: true);
+                }
+            }
+
             System.IO.File.Delete(tempZip);
 
-            return Ok(new { message = "Backup restaurado com sucesso!" });
+            return Ok("Backup restaurado com sucesso (somente arquivos JSON).");
         }
 
         // =========================
-        // Listar arquivos (JSON)
+        // LISTAR – SOMENTE JSON
         // =========================
         [HttpGet("ListarArquivos")]
         public IActionResult ListarArquivos()
         {
             var userPath = GetUserDataPath();
-            var arquivos = Directory.GetFiles(userPath)
+
+            var arquivosJson = Directory
+                .GetFiles(userPath, "*.json")
                 .Select(Path.GetFileName)
-                .Where(f => f != null)
                 .ToList();
 
-            return Ok(arquivos);
+            return Ok(arquivosJson);
         }
     }
 }

@@ -7,7 +7,7 @@ using System.Security.Claims;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using System.IO; // ✅ para manipular arquivos e pastas
+using System.IO;
 
 public class Cliente2Controller : Controller
 {
@@ -54,7 +54,8 @@ public class Cliente2Controller : Controller
             {
                 new Claim(ClaimTypes.Name, cliente.Nome),
                 new Claim(ClaimTypes.Email, cliente.Email),
-                new Claim("Plano", cliente.PlanoId.ToString())
+                new Claim("Plano", cliente.PlanoId.ToString()),
+                new Claim("ProximaCobranca", cliente.ProximaCobranca.ToString("yyyy-MM-dd"))
             };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -116,7 +117,6 @@ public class Cliente2Controller : Controller
     // Método auxiliar para criar pasta e arquivos JSON
     private void CriarEstruturaArquivos(string email)
     {
-        // Normaliza email para nome de pasta (evita caracteres inválidos)
         var pastaCliente = Path.Combine("Data", "User2", email.Replace("@", "_at_").Replace(".", "_"));
 
         if (!Directory.Exists(pastaCliente))
@@ -124,7 +124,6 @@ public class Cliente2Controller : Controller
             Directory.CreateDirectory(pastaCliente);
         }
 
-        // Lista de arquivos JSON
         string[] arquivos = {
             "agenda.json",
             "clientes.json",
@@ -144,7 +143,7 @@ public class Cliente2Controller : Controller
             var caminho = Path.Combine(pastaCliente, arquivo);
             if (!System.IO.File.Exists(caminho))
             {
-                System.IO.File.WriteAllText(caminho, "{}"); // cria JSON vazio
+                System.IO.File.WriteAllText(caminho, "{}");
             }
         }
     }

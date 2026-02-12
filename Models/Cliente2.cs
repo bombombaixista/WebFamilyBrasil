@@ -1,7 +1,4 @@
-﻿using System;
-using System.Numerics;
-
-namespace Kanban.Models
+﻿namespace Kanban.Models
 {
     public class Cliente2
     {
@@ -13,5 +10,8 @@ namespace Kanban.Models
         public Plano? Plano { get; set; }
         public DateTime DataCadastro { get; set; } = DateTime.UtcNow;
         public bool Ativo { get; set; } = true;
+
+        // ✅ Primeira cobrança só 30 dias depois do cadastro
+        public DateTime ProximaCobranca => DataCadastro.AddDays(30);
     }
 }

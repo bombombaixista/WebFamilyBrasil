@@ -1,13 +1,20 @@
 ﻿@model IEnumerable<Kanban.Models.Cliente2>
 
+@{
+    ViewData["Title"] = "Clientes cadastrados";
+}
+
 <h2>Clientes cadastrados</h2>
 
-<table class="table">
+<table class="table table-striped">
     <thead>
         <tr>
             <th>Nome</th>
             <th>Email</th>
             <th>Plano</th>
+            <th>Data Cadastro</th>
+            <th>Próxima Cobrança</th>
+            <th>Ações</th>
         </tr>
     </thead>
     <tbody>
@@ -16,7 +23,23 @@
             <tr>
                 <td>@cliente.Nome</td>
                 <td>@cliente.Email</td>
-                <td>@cliente.PlanoId</td>
+                <td>@cliente.Plano?.Nome</td>
+                <td>@cliente.DataCadastro.ToString("dd/MM/yyyy")</td>
+                <td>@cliente.ProximaCobranca.ToString("dd/MM/yyyy")</td>
+                <td>
+                    @if (DateTime.UtcNow >= cliente.ProximaCobranca)
+                    {
+                        <!-- Botão de pagamento só aparece depois dos 30 dias -->
+                        <form asp-controller="Checkout" asp-action="SelecionarPlano" method="post">
+                            <input type="hidden" name="codigo" value="@cliente.Plano?.Codigo" />
+                            <button type="submit" class="btn btn-primary">Pagar</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <span class="text-success">Ainda no período grátis</span>
+                    }
+                </td>
             </tr>
         }
     </tbody>
