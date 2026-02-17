@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
-namespace WebFamily.Controllers
+namespace Kanban.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -39,6 +39,7 @@ namespace WebFamily.Controllers
             var redirectUri = _config["MercadoPago:RedirectUri"];
 
             var tokenUrl = "https://api.mercadopago.com/oauth/token";
+#pragma warning disable CS8604 // Possível argumento de referência nula.
             var data = new Dictionary<string, string>
             {
                 {"client_id", clientId},
@@ -47,6 +48,7 @@ namespace WebFamily.Controllers
                 {"code", code},
                 {"redirect_uri", redirectUri}
             };
+#pragma warning restore CS8604 // Possível argumento de referência nula.
 
             var response = await _httpClient.PostAsync(tokenUrl, new FormUrlEncodedContent(data));
             var content = await response.Content.ReadAsStringAsync();

@@ -4,7 +4,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace WebFamily.Services
+namespace Kanban.Services
 {
     public class MercadoPagoService
     {

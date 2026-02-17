@@ -1,45 +1,55 @@
-﻿using System.Text.Json;
-using WebFamily.Models;
+﻿using Kanban.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace WebFamily.Services
+namespace Kanban.Services
 {
     public class MercadoLivreTokenService
     {
-        private readonly string _filePath;
+        private readonly AppDbContext _context;
 
-        public MercadoLivreTokenService(IWebHostEnvironment env)
+        public MercadoLivreTokenService(AppDbContext context)
         {
-            // Caminho do arquivo JSON dentro da pasta Data
-            _filePath = Path.Combine(env.ContentRootPath, "Data", "mercadolivre_token.json");
+            _context = context;
         }
 
-        /// <summary>
-        /// Lê o token salvo em JSON, se existir e ainda estiver válido.
-        /// </summary>
-        public async Task<MercadoLivreToken?> GetValidTokenAsync()
+        public async Task<Cliente2?> GetClienteComTokenAsync(Guid clienteId)
         {
-            if (!File.Exists(_filePath))
-                return null;
-
-            var json = await File.ReadAllTextAsync(_filePath);
-            var token = JsonSerializer.Deserialize<MercadoLivreToken>(json);
-
-            if (token == null) return null;
-
-            // Verifica se o token ainda não expirou
-            if (token.ExpirationDate > DateTime.UtcNow)
-                return token;
-
-            return null;
+            return await _context.Clientes2
+                .FirstOrDefaultAsync(c => c.Id == clienteId);
         }
 
-        /// <summary>
-        /// Salva ou atualiza o token em JSON.
-        /// </summary>
-        public async Task SaveTokenAsync(MercadoLivreToken newToken)
+        public async Task SalvarTokenAsync(
+            Guid clienteId,
+            string accessToken,
+            string refreshToken,
+            DateTime expiration,
+            long userId)
         {
-            var json = JsonSerializer.Serialize(newToken, new JsonSerializerOptions { WriteIndented = true });
-            await File.WriteAllTextAsync(_filePath, json);
+            var cliente = await _context.Clientes2
+                .FirstOrDefaultAsync(c => c.Id == clienteId);
+
+            if (cliente == null)
+                return;
+
+            cliente.MercadoLivreAccessToken = accessToken;
+            cliente.MercadoLivreRefreshToken = refreshToken;
+            cliente.MercadoLivreTokenExpiraEm = expiration;
+            cliente.MercadoLivreUserId = userId;
+            cliente.MercadoLivreConectado = true;
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<bool> TokenValidoAsync(Guid clienteId)
+        {
+            var cliente = await _context.Clientes2
+                .FirstOrDefaultAsync(c => c.Id == clienteId);
+
+            if (cliente == null)
+                return false;
+
+            return cliente.MercadoLivreTokenExpiraEm.HasValue &&
+                   cliente.MercadoLivreTokenExpiraEm > DateTime.UtcNow;
         }
     }
 }

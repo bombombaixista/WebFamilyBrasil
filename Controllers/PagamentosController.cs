@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
-using WebFamily.Services;
+using Kanban.Services;
+
 
 namespace WebFamily.Controllers
 {

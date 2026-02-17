@@ -1,5 +1,5 @@
 ﻿using System.Net.Http;
-using WebFamily.Models;
+using Kanban.Models;
 
 namespace WebFamily.Services
 {
@@ -12,15 +12,15 @@ namespace WebFamily.Services
             _httpClient = httpClient;
         }
 
-        public async Task<List<PedidoDto>> ObterPedidosAsync(string accessToken)
+        public async Task<List<Pedido>> ObterPedidosAsync(string accessToken)
         {
             // Exemplo fictício de chamada à API da AliExpress
             var response = await _httpClient.GetAsync("https://api.aliexpress.com/orders?token=" + accessToken);
             var json = await response.Content.ReadAsStringAsync();
 
-            return new List<PedidoDto>
+            return new List<Pedido>
             {
-                new PedidoDto { Id = 3, Cliente = "Cliente AliExpress", Data = DateTime.UtcNow, Valor = 300, Origem = "AliExpress" }
+                new Pedido { Id = 3, Cliente = "Cliente AliExpress", Data = DateTime.UtcNow, ValorTotal = 300, Origem = "AliExpress" }
             };
         }
     }

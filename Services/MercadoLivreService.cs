@@ -1,8 +1,8 @@
 ﻿using System.Net.Http;
 using System.Text.Json;
-using WebFamily.Models;
+using Kanban.Models;
 
-namespace WebFamily.Services
+namespace Kanban.Services
 {
     public class MercadoLivreService
     {
@@ -13,17 +13,37 @@ namespace WebFamily.Services
             _httpClient = httpClient;
         }
 
-        public async Task<List<PedidoDto>> ObterPedidosAsync(string accessToken, string sellerId)
+        public async Task<List<Pedido>> ObterPedidosAsync(string accessToken, string sellerId)
         {
             var response = await _httpClient.GetAsync(
                 $"https://api.mercadolibre.com/orders/search?seller={sellerId}&access_token={accessToken}");
 
+            response.EnsureSuccessStatusCode();
+
             var json = await response.Content.ReadAsStringAsync();
-            // Aqui você faria o parse real da resposta da API
-            return new List<PedidoDto>
+
+            using var doc = JsonDocument.Parse(json);
+
+            var pedidos = new List<Pedido>();
+
+            if (doc.RootElement.TryGetProperty("results", out var results))
             {
-                new PedidoDto { Id = 1, Cliente = "Cliente ML", Data = DateTime.UtcNow, Valor = 100, Origem = "Mercado Livre" }
-            };
+                foreach (var item in results.EnumerateArray())
+                {
+                    var pedido = new Pedido
+                    {
+                        Id = item.GetProperty("id").GetInt64(),
+                        Cliente = item.GetProperty("buyer").GetProperty("nickname").GetString() ?? "",
+                        ValorTotal = item.GetProperty("total_amount").GetDecimal(),
+                        Data = item.GetProperty("date_created").GetDateTime(),
+                        Origem = "Mercado Livre"
+                    };
+
+                    pedidos.Add(pedido);
+                }
+            }
+
+            return pedidos;
         }
     }
 }

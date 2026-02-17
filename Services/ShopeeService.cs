@@ -1,7 +1,7 @@
 ﻿using System.Net.Http;
-using WebFamily.Models;
+using Kanban.Models;
 
-namespace WebFamily.Services
+namespace Kanban.Services
 {
     public class ShopeeService
     {
@@ -12,15 +12,15 @@ namespace WebFamily.Services
             _httpClient = httpClient;
         }
 
-        public async Task<List<PedidoDto>> ObterPedidosAsync(string accessToken)
+        public async Task<List<Pedido>> ObterPedidosAsync(string accessToken)
         {
             // Exemplo fictício de chamada à API da Shopee
             var response = await _httpClient.GetAsync("https://api.shopee.com/orders?token=" + accessToken);
             var json = await response.Content.ReadAsStringAsync();
 
-            return new List<PedidoDto>
+            return new List<Pedido>
             {
-                new PedidoDto { Id = 2, Cliente = "Cliente Shopee", Data = DateTime.UtcNow, Valor = 200, Origem = "Shopee" }
+                new Pedido { Id = 2, Cliente = "Cliente Shopee", Data = DateTime.UtcNow, ValorTotal = 200, Origem = "Shopee" }
             };
         }
     }

@@ -20,7 +20,7 @@
         })
         .ToList();
 
-    var clientes = (ViewBag.Clientes as List<string?> ?? grouped.Select(g => g.Cliente).ToList())
+    var clientes = (ViewBag.Clientes as List<string> ?? grouped.Select(g => g.Cliente).ToList())
         .Where(c => !string.IsNullOrWhiteSpace(c))
         .Select(c => c!)
         .ToList();

@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WebFamily.Models;
+using Kanban.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Text.Json;
 using System.Security.Claims;
 
-namespace WebFamily.Controllers
+namespace Kanban.Controllers
 {
     [Authorize]
     [Route("Pedidos")]
@@ -41,15 +41,15 @@ namespace WebFamily.Controllers
             return Path.Combine(GetUserDataPath(), "pedidos.json");
         }
 
-        private List<PedidoDto> GetPedidos()
+        private List<Pedido> GetPedidos()
         {
             var path = GetPedidosFilePath();
-            if (!System.IO.File.Exists(path)) return new List<PedidoDto>();
+            if (!System.IO.File.Exists(path)) return new List<Pedido>();
             var json = System.IO.File.ReadAllText(path);
-            return JsonSerializer.Deserialize<List<PedidoDto>>(json, _jsonOptions) ?? new List<PedidoDto>();
+            return JsonSerializer.Deserialize<List<Pedido>>(json, _jsonOptions) ?? new List<Pedido>();
         }
 
-        private void SalvarPedidos(List<PedidoDto> pedidos)
+        private void SalvarPedidos(List<Pedido> pedidos)
         {
             var path = GetPedidosFilePath();
             var json = JsonSerializer.Serialize(pedidos, _jsonOptions);
@@ -112,7 +112,7 @@ namespace WebFamily.Controllers
         // ADICIONAR PEDIDO (API)
         // =========================
         [HttpPost("Adicionar")]
-        public IActionResult Adicionar([FromBody] PedidoDto pedido)
+        public IActionResult Adicionar([FromBody] Pedido pedido)
         {
             var pedidos = GetPedidos();
             pedido.Id = pedidos.Count > 0 ? pedidos.Max(p => p.Id) + 1 : 1;
