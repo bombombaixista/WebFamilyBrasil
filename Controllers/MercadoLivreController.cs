@@ -26,16 +26,20 @@ namespace Kanban.Controllers
         // 🔹 Passo 1: Conectar
         public IActionResult Connect(Guid clienteId)
         {
-            var redirectUri = Url.Action("Callback", "MercadoLivre", new { clienteId }, Request.Scheme);
-            var url = $"https://auth.mercadolibre.com/authorization?response_type=code&client_id={_clientId}&redirect_uri={redirectUri}";
+            // Redirect URI sem parâmetros extras
+            var redirectUri = Url.Action("Callback", "MercadoLivre", null, "https");
+
+            // ClienteId enviado via parâmetro state
+            var url = $"https://auth.mercadolibre.com/authorization?response_type=code&client_id={_clientId}&redirect_uri={redirectUri}&state={clienteId}";
             return Redirect(url);
         }
 
         // 🔹 Passo 2: Callback
-        public async Task<IActionResult> Callback(string code, Guid clienteId)
+        public async Task<IActionResult> Callback(string code, string state)
         {
             try
             {
+                Guid clienteId = Guid.Parse(state);
                 var httpClient = _httpClientFactory.CreateClient();
 
                 var requestBody = new Dictionary<string, string>
@@ -44,7 +48,7 @@ namespace Kanban.Controllers
                     { "client_id", _clientId },
                     { "client_secret", _clientSecret },
                     { "code", code },
-                    { "redirect_uri", Url.Action("Callback", "MercadoLivre", new { clienteId }, Request.Scheme) }
+                    { "redirect_uri", Url.Action("Callback", "MercadoLivre", null, "https") }
                 };
 
                 var response = await httpClient.PostAsync("https://api.mercadolibre.com/oauth/token", new FormUrlEncodedContent(requestBody));
@@ -55,7 +59,7 @@ namespace Kanban.Controllers
 
                 var json = JsonDocument.Parse(content).RootElement;
 
-                // 🔹 Parse seguro do user_id para long
+                // Parse seguro do user_id para long
                 var userIdString = json.GetProperty("user_id").GetRawText();
                 long userId = long.Parse(userIdString);
 
