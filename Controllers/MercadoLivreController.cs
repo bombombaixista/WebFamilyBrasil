@@ -27,7 +27,7 @@ namespace Kanban.Controllers
         public IActionResult Connect(Guid clienteId)
         {
             var redirectUri = Url.Action("Callback", "MercadoLivre", new { clienteId }, Request.Scheme);
-            var url = $"https://auth.mercadolibre.com.br/authorization?response_type=code&client_id={_clientId}&redirect_uri={redirectUri}";
+            var url = $"https://auth.mercadolibre.com/authorization?response_type=code&client_id={_clientId}&redirect_uri={redirectUri}";
             return Redirect(url);
         }
 
