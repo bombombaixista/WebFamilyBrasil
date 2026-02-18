@@ -41,7 +41,7 @@ namespace Kanban.Controllers
             return Redirect(url);
         }
 
-        // 🔹 PASSO 2 - Callback
+        // 🔹 PASSO 2 - Callback (troca code por token)
         public async Task<IActionResult> Callback(string code)
         {
             if (string.IsNullOrEmpty(code))
