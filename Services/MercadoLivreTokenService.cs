@@ -1,5 +1,4 @@
-﻿using Kanban.Model;
-using Kanban.Models;
+﻿using Kanban.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
@@ -23,13 +22,11 @@ namespace Kanban.Services
             _clientSecret = configuration["MercadoLivre:ClientSecret"]!;
         }
 
-        // 🔹 Salva o token inicial no Cliente2
+        // 🔹 Salva o token inicial
         public async Task<MercadoLivreToken> SaveInitialTokenAsync(Guid clienteId, MercadoLivreToken token)
         {
             var cliente = await _dbContext.Clientes2.FirstOrDefaultAsync(c => c.Id == clienteId);
-
-            if (cliente == null)
-                throw new Exception("Cliente não encontrado.");
+            if (cliente == null) throw new Exception("Cliente não encontrado.");
 
             cliente.MercadoLivreAccessToken = token.AccessToken;
             cliente.MercadoLivreRefreshToken = token.RefreshToken;
@@ -45,16 +42,11 @@ namespace Kanban.Services
         public async Task<MercadoLivreToken> GetValidTokenAsync(Guid clienteId)
         {
             var cliente = await _dbContext.Clientes2.FirstOrDefaultAsync(c => c.Id == clienteId);
-
             if (cliente == null || string.IsNullOrEmpty(cliente.MercadoLivreAccessToken))
                 throw new Exception("Cliente não conectado ao Mercado Livre.");
 
-            // Se expirado, renova
-            if (cliente.MercadoLivreTokenExpiraEm <= DateTime.UtcNow)
-            {
-                var newToken = await RefreshTokenAsync(cliente);
-                return newToken;
-            }
+            if (cliente.MercadoLivreTokenExpiraEm <= DateTime.UtcNow.AddMinutes(5))
+                return await RefreshTokenAsync(cliente);
 
             return new MercadoLivreToken
             {
@@ -84,6 +76,8 @@ namespace Kanban.Services
             );
 
             var content = await response.Content.ReadAsStringAsync();
+            response.EnsureSuccessStatusCode();
+
             var json = JsonDocument.Parse(content).RootElement;
 
             var newToken = new MercadoLivreToken
@@ -96,14 +90,12 @@ namespace Kanban.Services
                 UserId = json.GetProperty("user_id").GetInt64()
             };
 
-            // Atualiza cliente
             cliente.MercadoLivreAccessToken = newToken.AccessToken;
             cliente.MercadoLivreRefreshToken = newToken.RefreshToken;
             cliente.MercadoLivreTokenExpiraEm = newToken.ExpirationDate;
             cliente.MercadoLivreUserId = newToken.UserId;
 
             await _dbContext.SaveChangesAsync();
-
             return newToken;
         }
     }

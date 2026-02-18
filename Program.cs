@@ -27,7 +27,9 @@ builder.Services.AddHttpClient();
 // ==========================
 builder.Services.AddScoped<MercadoLivreTokenService>();
 builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<MercadoPagoService>(); // ✅ registra o service do Mercado Pago
+builder.Services.AddScoped<MercadoPagoService>();
+builder.Services.AddHostedService<MercadoLivreTokenBackgroundService>();
+
 
 // ==========================
 // MVC
