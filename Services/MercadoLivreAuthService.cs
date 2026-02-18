@@ -1,18 +1,23 @@
-﻿using Kanban.Model;
-using Kanban.Models;
+﻿using Kanban.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
 namespace Kanban.Services
 {
-    public class MercadoLivreTokenService
+    public interface IMercadoLivreAuthService
+    {
+        Task<MercadoLivreToken> GetValidTokenAsync(Guid clienteId);
+        Task<MercadoLivreToken> SaveInitialTokenAsync(Guid clienteId, MercadoLivreToken token);
+    }
+
+    public class MercadoLivreAuthService : IMercadoLivreAuthService
     {
         private readonly AppDbContext _dbContext;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly string _clientId;
         private readonly string _clientSecret;
 
-        public MercadoLivreTokenService(
+        public MercadoLivreAuthService(
             AppDbContext dbContext,
             IHttpClientFactory httpClientFactory,
             IConfiguration configuration)
@@ -21,24 +26,6 @@ namespace Kanban.Services
             _httpClientFactory = httpClientFactory;
             _clientId = configuration["MercadoLivre:ClientId"]!;
             _clientSecret = configuration["MercadoLivre:ClientSecret"]!;
-        }
-
-        // 🔹 Salva o token inicial no Cliente2
-        public async Task<MercadoLivreToken> SaveInitialTokenAsync(Guid clienteId, MercadoLivreToken token)
-        {
-            var cliente = await _dbContext.Clientes2.FirstOrDefaultAsync(c => c.Id == clienteId);
-
-            if (cliente == null)
-                throw new Exception("Cliente não encontrado.");
-
-            cliente.MercadoLivreAccessToken = token.AccessToken;
-            cliente.MercadoLivreRefreshToken = token.RefreshToken;
-            cliente.MercadoLivreTokenExpiraEm = token.ExpirationDate;
-            cliente.MercadoLivreUserId = token.UserId;
-            cliente.MercadoLivreConectado = true;
-
-            await _dbContext.SaveChangesAsync();
-            return token;
         }
 
         // 🔹 Retorna token válido (renova se necessário)
@@ -63,6 +50,24 @@ namespace Kanban.Services
                 ExpirationDate = cliente.MercadoLivreTokenExpiraEm!.Value,
                 UserId = cliente.MercadoLivreUserId ?? 0
             };
+        }
+
+        // 🔹 Salva o primeiro token obtido no Callback
+        public async Task<MercadoLivreToken> SaveInitialTokenAsync(Guid clienteId, MercadoLivreToken token)
+        {
+            var cliente = await _dbContext.Clientes2.FirstOrDefaultAsync(c => c.Id == clienteId);
+
+            if (cliente == null)
+                throw new Exception("Cliente não encontrado.");
+
+            cliente.MercadoLivreAccessToken = token.AccessToken;
+            cliente.MercadoLivreRefreshToken = token.RefreshToken;
+            cliente.MercadoLivreTokenExpiraEm = token.ExpirationDate;
+            cliente.MercadoLivreUserId = token.UserId;
+            cliente.MercadoLivreConectado = true;
+
+            await _dbContext.SaveChangesAsync();
+            return token;
         }
 
         // 🔹 Fluxo de refresh
