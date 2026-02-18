@@ -19,7 +19,10 @@
         public string? MercadoLivreAccessToken { get; set; }
         public string? MercadoLivreRefreshToken { get; set; }
         public DateTime? MercadoLivreTokenExpiraEm { get; set; }
-        public long? MercadoLivreUserId { get; set; }
+
+        // 👉 Agora como string para evitar erro de cast
+        public string? MercadoLivreUserId { get; set; }
+
         public bool MercadoLivreConectado { get; set; }
     }
 }
