@@ -26,6 +26,7 @@ namespace Kanban.Controllers
         // 🔹 Passo 1: Conectar
         public IActionResult Connect(Guid clienteId)
         {
+            // Usa o domínio global correto: auth.mercadolibre.com
             var redirectUri = Url.Action("Callback", "MercadoLivre", new { clienteId }, Request.Scheme);
             var url = $"https://auth.mercadolibre.com/authorization?response_type=code&client_id={_clientId}&redirect_uri={redirectUri}";
             return Redirect(url);
