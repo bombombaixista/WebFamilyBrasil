@@ -20,8 +20,8 @@
         public string? MercadoLivreRefreshToken { get; set; }
         public DateTime? MercadoLivreTokenExpiraEm { get; set; }
 
-        // 👉 Agora como string para evitar erro de cast
-        public string? MercadoLivreUserId { get; set; }
+        // Mantém como long para alinhar com BIGINT no banco
+        public long? MercadoLivreUserId { get; set; }
 
         public bool MercadoLivreConectado { get; set; }
     }

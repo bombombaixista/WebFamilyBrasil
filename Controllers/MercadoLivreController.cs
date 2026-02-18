@@ -26,7 +26,6 @@ namespace Kanban.Controllers
         // 🔹 Passo 1: Conectar
         public IActionResult Connect(Guid clienteId)
         {
-            // Usa o domínio global correto: auth.mercadolibre.com
             var redirectUri = Url.Action("Callback", "MercadoLivre", new { clienteId }, Request.Scheme);
             var url = $"https://auth.mercadolibre.com/authorization?response_type=code&client_id={_clientId}&redirect_uri={redirectUri}";
             return Redirect(url);
@@ -39,7 +38,6 @@ namespace Kanban.Controllers
             {
                 var httpClient = _httpClientFactory.CreateClient();
 
-#pragma warning disable CS8604 // Possível argumento de referência nula.
                 var requestBody = new Dictionary<string, string>
                 {
                     { "grant_type", "authorization_code" },
@@ -48,7 +46,6 @@ namespace Kanban.Controllers
                     { "code", code },
                     { "redirect_uri", Url.Action("Callback", "MercadoLivre", new { clienteId }, Request.Scheme) }
                 };
-#pragma warning restore CS8604 // Possível argumento de referência nula.
 
                 var response = await httpClient.PostAsync("https://api.mercadolibre.com/oauth/token", new FormUrlEncodedContent(requestBody));
                 var content = await response.Content.ReadAsStringAsync();
@@ -58,13 +55,17 @@ namespace Kanban.Controllers
 
                 var json = JsonDocument.Parse(content).RootElement;
 
+                // 🔹 Parse seguro do user_id para long
+                var userIdString = json.GetProperty("user_id").GetRawText();
+                long userId = long.Parse(userIdString);
+
                 var token = new MercadoLivreToken
                 {
                     AccessToken = json.GetProperty("access_token").GetString()!,
                     RefreshToken = json.GetProperty("refresh_token").GetString()!,
                     ExpiresIn = json.GetProperty("expires_in").GetInt32(),
                     ExpirationDate = DateTime.UtcNow.AddSeconds(json.GetProperty("expires_in").GetInt32()),
-                    UserId = json.GetProperty("user_id").GetInt64()
+                    UserId = userId
                 };
 
                 await _mercadoLivreTokenService.SaveInitialTokenAsync(clienteId, token);
