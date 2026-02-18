@@ -11,7 +11,6 @@ namespace Kanban.Controllers
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly string _clientId;
         private readonly string _clientSecret;
-        private readonly string _redirectUri;
 
         public MercadoLivreController(
             MercadoLivreTokenService mercadoLivreTokenService,
@@ -20,87 +19,82 @@ namespace Kanban.Controllers
         {
             _mercadoLivreTokenService = mercadoLivreTokenService;
             _httpClientFactory = httpClientFactory;
-
             _clientId = configuration["MercadoLivre:ClientId"]!;
             _clientSecret = configuration["MercadoLivre:ClientSecret"]!;
-            _redirectUri = configuration["MercadoLivre:RedirectUri"]!;
         }
 
-        // 🔹 PASSO 1 - Redireciona para autorização
+        // 🔹 Passo 1: Conectar
         public IActionResult Connect(Guid clienteId)
         {
-            // Guardar clienteId em TempData para usar no Callback
-            TempData["ClienteId"] = clienteId;
-
-            var url =
-                "https://auth.mercadolivre.com.br/authorization" +
-                "?response_type=code" +
-                $"&client_id={_clientId}" +
-                $"&redirect_uri={Uri.EscapeDataString(_redirectUri)}";
-
+            var redirectUri = Url.Action("Callback", "MercadoLivre", new { clienteId }, Request.Scheme);
+            var url = $"https://auth.mercadolibre.com.br/authorization?response_type=code&client_id={_clientId}&redirect_uri={redirectUri}";
             return Redirect(url);
         }
 
-        // 🔹 PASSO 2 - Callback (troca code por token)
-        public async Task<IActionResult> Callback(string code)
+        // 🔹 Passo 2: Callback
+        public async Task<IActionResult> Callback(string code, Guid clienteId)
         {
-            if (string.IsNullOrEmpty(code))
-                return Content("Código não recebido.");
-
-            var httpClient = _httpClientFactory.CreateClient();
-
-            var requestBody = new Dictionary<string, string>
+            try
             {
-                { "grant_type", "authorization_code" },
-                { "client_id", _clientId },
-                { "client_secret", _clientSecret },
-                { "code", code },
-                { "redirect_uri", _redirectUri }
-            };
+                var httpClient = _httpClientFactory.CreateClient();
 
-            var response = await httpClient.PostAsync(
-                "https://api.mercadolibre.com/oauth/token",
-                new FormUrlEncodedContent(requestBody)
-            );
+#pragma warning disable CS8604 // Possível argumento de referência nula.
+                var requestBody = new Dictionary<string, string>
+                {
+                    { "grant_type", "authorization_code" },
+                    { "client_id", _clientId },
+                    { "client_secret", _clientSecret },
+                    { "code", code },
+                    { "redirect_uri", Url.Action("Callback", "MercadoLivre", new { clienteId }, Request.Scheme) }
+                };
+#pragma warning restore CS8604 // Possível argumento de referência nula.
 
-            var content = await response.Content.ReadAsStringAsync();
+                var response = await httpClient.PostAsync("https://api.mercadolibre.com/oauth/token", new FormUrlEncodedContent(requestBody));
+                var content = await response.Content.ReadAsStringAsync();
 
-            if (!response.IsSuccessStatusCode)
-                return Content($"Erro ao obter token:\n{content}", "text/plain");
+                if (!response.IsSuccessStatusCode)
+                    return Content($"Erro ao obter token:\n{content}", "text/plain");
 
-            var json = JsonDocument.Parse(content).RootElement;
+                var json = JsonDocument.Parse(content).RootElement;
 
-            var token = new MercadoLivreToken
+                var token = new MercadoLivreToken
+                {
+                    AccessToken = json.GetProperty("access_token").GetString()!,
+                    RefreshToken = json.GetProperty("refresh_token").GetString()!,
+                    ExpiresIn = json.GetProperty("expires_in").GetInt32(),
+                    ExpirationDate = DateTime.UtcNow.AddSeconds(json.GetProperty("expires_in").GetInt32()),
+                    UserId = json.GetProperty("user_id").GetInt64()
+                };
+
+                await _mercadoLivreTokenService.SaveInitialTokenAsync(clienteId, token);
+
+                return Content("Conexão com Mercado Livre realizada com sucesso!");
+            }
+            catch (Exception ex)
             {
-                AccessToken = json.GetProperty("access_token").GetString()!,
-                RefreshToken = json.GetProperty("refresh_token").GetString()!,
-                TokenType = json.GetProperty("token_type").GetString()!,
-                ExpiresIn = json.GetProperty("expires_in").GetInt32(),
-                ExpirationDate = DateTime.UtcNow.AddSeconds(json.GetProperty("expires_in").GetInt32()),
-                UserId = json.GetProperty("user_id").GetInt64()
-            };
-
-            // Recupera clienteId salvo no Connect
-            var clienteId = Guid.Parse(TempData["ClienteId"]!.ToString()!);
-
-            await _mercadoLivreTokenService.SaveInitialTokenAsync(clienteId, token);
-
-            return Content("Conexão com Mercado Livre realizada com sucesso!");
+                return Content($"Erro interno no Callback: {ex.Message}\n{ex.StackTrace}", "text/plain");
+            }
         }
 
-        // 🔹 PASSO 3 - Exemplo de uso do token válido
+        // 🔹 Passo 3: Testar API
         public async Task<IActionResult> TestApi(Guid clienteId)
         {
-            var token = await _mercadoLivreTokenService.GetValidTokenAsync(clienteId);
+            try
+            {
+                var token = await _mercadoLivreTokenService.GetValidTokenAsync(clienteId);
+                var httpClient = _httpClientFactory.CreateClient();
+                httpClient.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.AccessToken);
 
-            var httpClient = _httpClientFactory.CreateClient();
-            httpClient.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.AccessToken);
+                var response = await httpClient.GetAsync("https://api.mercadolibre.com/users/me");
+                var content = await response.Content.ReadAsStringAsync();
 
-            var response = await httpClient.GetAsync("https://api.mercadolibre.com/users/me");
-            var content = await response.Content.ReadAsStringAsync();
-
-            return Content(content, "application/json");
+                return Content(content, "application/json");
+            }
+            catch (Exception ex)
+            {
+                return Content($"Erro ao chamar API: {ex.Message}\n{ex.StackTrace}", "text/plain");
+            }
         }
     }
 }
