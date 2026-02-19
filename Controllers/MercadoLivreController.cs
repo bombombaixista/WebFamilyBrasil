@@ -18,24 +18,66 @@ namespace Kanban.Controllers
             _httpClientFactory = httpClientFactory;
         }
 
-        // 🔹 Testa chamada à API do Mercado Livre
+        // 🔹 Perfil do usuário
         [HttpGet("TestApi")]
         public async Task<IActionResult> TestApi(Guid clienteId)
         {
             try
             {
                 var token = await _mercadoLivreTokenService.GetValidTokenAsync(clienteId);
-
                 var httpClient = _httpClientFactory.CreateClient();
-                var response = await httpClient.GetAsync($"https://api.mercadolibre.com/users/me?access_token={token.AccessToken}");
+                var response = await httpClient.GetAsync(
+                    $"https://api.mercadolibre.com/users/me?access_token={token.AccessToken}"
+                );
                 response.EnsureSuccessStatusCode();
-
                 var content = await response.Content.ReadAsStringAsync();
                 return Ok(content);
             }
             catch (Exception ex)
             {
                 return BadRequest($"Erro ao chamar API: {ex.Message}");
+            }
+        }
+
+        // 🔹 Produtos (anúncios ativos)
+        [HttpGet("Produtos")]
+        public async Task<IActionResult> Produtos(Guid clienteId)
+        {
+            try
+            {
+                var token = await _mercadoLivreTokenService.GetValidTokenAsync(clienteId);
+                var httpClient = _httpClientFactory.CreateClient();
+                var response = await httpClient.GetAsync(
+                    $"https://api.mercadolibre.com/users/{token.UserId}/items/search?access_token={token.AccessToken}"
+                );
+                response.EnsureSuccessStatusCode();
+                var content = await response.Content.ReadAsStringAsync();
+                return Ok(content);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Erro ao buscar produtos: {ex.Message}");
+            }
+        }
+
+        // 🔹 Pedidos (ordens de venda)
+        [HttpGet("Pedidos")]
+        public async Task<IActionResult> Pedidos(Guid clienteId)
+        {
+            try
+            {
+                var token = await _mercadoLivreTokenService.GetValidTokenAsync(clienteId);
+                var httpClient = _httpClientFactory.CreateClient();
+                var response = await httpClient.GetAsync(
+                    $"https://api.mercadolibre.com/orders/search?seller={token.UserId}&access_token={token.AccessToken}"
+                );
+                response.EnsureSuccessStatusCode();
+                var content = await response.Content.ReadAsStringAsync();
+                return Ok(content);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Erro ao buscar pedidos: {ex.Message}");
             }
         }
     }
