@@ -22,6 +22,22 @@ namespace Kanban.Services
             _clientSecret = configuration["MercadoLivre:ClientSecret"]!;
         }
 
+        // 🔹 Salva o token inicial (usado pelo fluxo de OAuth)
+        public async Task<MercadoLivreToken> SaveInitialTokenAsync(Guid clienteId, MercadoLivreToken token)
+        {
+            var cliente = await _dbContext.Clientes2.FirstOrDefaultAsync(c => c.Id == clienteId);
+            if (cliente == null) throw new Exception("Cliente não encontrado.");
+
+            cliente.MercadoLivreAccessToken = token.AccessToken;
+            cliente.MercadoLivreRefreshToken = token.RefreshToken;
+            cliente.MercadoLivreTokenExpiraEm = token.ExpirationDate;
+            cliente.MercadoLivreUserId = token.UserId;
+            cliente.MercadoLivreConectado = true;
+
+            await _dbContext.SaveChangesAsync();
+            return token;
+        }
+
         // 🔹 Retorna token válido (renova se expirou)
         public async Task<MercadoLivreToken> GetValidTokenAsync(Guid clienteId)
         {
