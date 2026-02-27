@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -9,9 +10,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kanban.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260224090149_CriarTabelaPedidos")]
+    partial class CriarTabelaPedidos
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -244,41 +247,6 @@ namespace Kanban.Migrations
                             Nome = "Empresarial",
                             PrecoMensal = 119.90m
                         });
-                });
-
-            modelBuilder.Entity("LogIntegracao", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Conteudo")
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("Data")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Erro")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Evento")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Marketplace")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<bool>("Sucesso")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("Tipo")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("LogIntegracoes");
                 });
 
             modelBuilder.Entity("Kanban.Models.Cliente2", b =>

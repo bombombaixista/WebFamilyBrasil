@@ -1,310 +1,126 @@
-﻿@model List<Kanban.Models.Produto>
+﻿@model IEnumerable<Kanban.Models.Produto>
 
-<style>
-    /* ===== FIX RESPONSIVO (Razor-safe) ===== */
-    @@media (max-width: 576px) {
-        /* CARDS */
-        .dashboard-card h5 {
-            font-size: 0.65rem !important;
-            margin-bottom: 2px;
-            line-height: 1.1;
-        }
+<h2>Meus Produtos</h2>
 
-        .dashboard-card h3 {
-            font-size: 0.95rem !important;
-            font-weight: 600;
-            line-height: 1.1;
-        }
+<!-- Botões de ação -->
+<div class="mb-3">
+    <a asp-action="Create" class="btn btn-success">+ Novo Produto</a>
+    <a asp-controller="MercadoLivre" asp-action="Produtos" asp-route-clienteId="062a57ff-e2e5-46e3-9e8e-f1c650b1d05c"
+       class="btn btn-primary">Sincronizar com Mercado Livre</a>
+</div>
 
-        .dashboard-card .card-body {
-            padding: 0.5rem;
-            text-align: center;
-        }
-        /* GRÁFICOS */
-        .grafico-box {
-            width: 140px;
-            height: 140px;
-        }
-        /* AÇÕES */
-        .acoes-desktop {
-            display: none;
-        }
+<!-- Abas para alternar gráficos -->
+<ul class="nav nav-tabs mb-3" id="graficoTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="pizza-tab" data-bs-toggle="tab" data-bs-target="#pizza" type="button" role="tab">Estoque</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="donut-tab" data-bs-toggle="tab" data-bs-target="#donut" type="button" role="tab">Preço Total</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="barra-tab" data-bs-toggle="tab" data-bs-target="#barra" type="button" role="tab">Comparativo Estoque</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="linha-tab" data-bs-toggle="tab" data-bs-target="#linha" type="button" role="tab">Evolução Estoque</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="radar-tab" data-bs-toggle="tab" data-bs-target="#radar" type="button" role="tab">Radar Estoque x Preço</button>
+    </li>
+</ul>
 
-        .acoes-mobile {
-            display: block;
-        }
-    }
-
-    @@media (min-width: 577px) {
-        .grafico-box {
-            width: 200px;
-            height: 200px;
-        }
-
-        .acoes-mobile {
-            display: none;
-        }
-    }
-
-    .grafico-box {
-        margin: auto;
-    }
-</style>
-
-<div class="container mt-4">
-    <h2 class="mb-4 text-center">📊 Dashboard de Estoque</h2>
-
-    <!-- CARDS -->
-    <div class="row mb-4 g-2">
-        <div class="col-6 col-md-3">
-            <div class="card text-white bg-primary shadow dashboard-card">
-                <div class="card-body">
-                    <h5>Total de Produtos</h5>
-                    <h3>@Model.Count</h3>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-6 col-md-3">
-            <div class="card text-white bg-success shadow dashboard-card">
-                <div class="card-body">
-                    <h5>Estoque Total</h5>
-                    <h3>@Model.Sum(p => p.Estoque)</h3>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-6 col-md-3">
-            <div class="card text-white bg-warning shadow dashboard-card">
-                <div class="card-body">
-                    <h5>Valor em Estoque</h5>
-                    <h3>R$ @Model.Sum(p => p.Estoque * p.Preco)</h3>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-6 col-md-3">
-            <div class="card text-white bg-danger shadow dashboard-card">
-                <div class="card-body">
-                    <h5>Produtos Críticos</h5>
-                    <h3>@Model.Count(p => p.Estoque < 5)</h3>
-                </div>
-            </div>
+<!-- Conteúdo das abas -->
+<div class="tab-content text-center mb-4" id="graficoTabsContent">
+    <div class="tab-pane fade show active" id="pizza" role="tabpanel">
+        <div style="width:180px;height:180px;margin:auto">
+            <canvas id="graficoPizza"></canvas>
         </div>
     </div>
-
-    <!-- GRÁFICOS -->
-    <div class="row mb-4 text-center">
-        <div class="col-md-4 mb-3">
-            <div class="grafico-box">
-                <canvas id="graficoPizza"></canvas>
-            </div>
-            <small>Por Categoria</small>
-        </div>
-
-        <div class="col-md-4 mb-3">
-            <div class="grafico-box">
-                <canvas id="graficoDonut"></canvas>
-            </div>
-            <small>Estoque</small>
-        </div>
-
-        <div class="col-md-4 mb-3">
-            <div class="grafico-box">
-                <canvas id="graficoBarra"></canvas>
-            </div>
-            <small>Resumo</small>
+    <div class="tab-pane fade" id="donut" role="tabpanel">
+        <div style="width:180px;height:180px;margin:auto">
+            <canvas id="graficoDonut"></canvas>
         </div>
     </div>
-
-    <!-- BOTÕES -->
-    <div class="mb-3 text-center">
-        <a asp-action="Create" class="btn btn-success me-2">➕ Produto</a>
-        <a asp-action="Movimentacoes" class="btn btn-info">📜 Histórico</a>
-    </div>
-
-    <!-- FILTROS (RESTAURADOS) -->
-    <div class="card shadow-sm mb-3">
-        <div class="card-body row g-2 align-items-end">
-            <div class="col-md-3">
-                <label class="form-label">Buscar por Nome</label>
-                <input id="filtroNome" class="form-control">
-            </div>
-
-            <div class="col-md-2">
-                <label class="form-label">Categoria</label>
-                <select id="filtroCategoria" class="form-select">
-                    <option value="">Todas</option>
-                    @foreach (var c in Model.Select(x => x.Categoria).Distinct())
-                    {
-                        <option>@c</option>
-                    }
-                </select>
-            </div>
-
-            <div class="col-md-2">
-                <label class="form-label">Fornecedor</label>
-                <select id="filtroFornecedor" class="form-select">
-                    <option value="">Todos</option>
-                    @foreach (var f in Model.Select(x => x.Fornecedor).Distinct())
-                    {
-                        <option>@f</option>
-                    }
-                </select>
-            </div>
-
-            <div class="col-md-2">
-                <label class="form-label">Preço Máx.</label>
-                <input id="filtroPreco" type="number" class="form-control">
-            </div>
-
-            <div class="col-md-2">
-                <label class="form-label">Estoque Mín.</label>
-                <input id="filtroEstoque" type="number" class="form-control">
-            </div>
-
-            <div class="col-md-1 d-grid gap-1">
-                <button class="btn btn-success" onclick="aplicarFiltros()">Filtrar</button>
-                <button class="btn btn-secondary" onclick="limparFiltros()">Limpar</button>
-            </div>
+    <div class="tab-pane fade" id="barra" role="tabpanel">
+        <div style="width:180px;height:180px;margin:auto">
+            <canvas id="graficoBarra"></canvas>
         </div>
     </div>
-
-    <!-- TABELA -->
-    <div class="card shadow">
-        <div class="card-header bg-dark text-white">
-            📦 Lista de Produtos
+    <div class="tab-pane fade" id="linha" role="tabpanel">
+        <div style="width:180px;height:180px;margin:auto">
+            <canvas id="graficoLinha"></canvas>
         </div>
-
-        <div class="card-body table-responsive">
-            <table class="table table-bordered table-hover align-middle">
-                <thead class="table-secondary">
-                    <tr>
-                        <th>ID</th>
-                        <th>Nome</th>
-                        <th>Categoria</th>
-                        <th>Fornecedor</th>
-                        <th>Estoque</th>
-                        <th>Preço</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="produtosTabela">
-                    @foreach (var p in Model)
-                    {
-                        <tr class="@(p.Estoque < 5 ? "table-danger" : "")">
-                            <td>@p.Id</td>
-                            <td>@p.Nome</td>
-                            <td>@p.Categoria</td>
-                            <td>@p.Fornecedor</td>
-                            <td>@p.Estoque</td>
-                            <td>R$ @p.Preco</td>
-                            <td>
-                                <div class="acoes-desktop d-flex gap-1">
-                                    <a asp-action="Edit" asp-route-id="@p.Id" class="btn btn-warning btn-sm">✏️</a>
-                                    <button class="btn btn-primary btn-sm" onclick="movimentar(@p.Id, 'entrada')">➕</button>
-                                    <button class="btn btn-danger btn-sm" onclick="movimentar(@p.Id, 'saida')">➖</button>
-                                </div>
-
-                                <div class="acoes-mobile">
-                                    <button class="btn btn-secondary btn-sm w-100"
-                                            onclick="movimentar(@p.Id, 'menu')">
-                                        🔄 Movimentar
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+    </div>
+    <div class="tab-pane fade" id="radar" role="tabpanel">
+        <div style="width:180px;height:180px;margin:auto">
+            <canvas id="graficoRadar"></canvas>
         </div>
     </div>
 </div>
 
-@section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Campo de filtro -->
+<input type="text" id="filtro" class="form-control mb-3" placeholder="Filtrar por nome ou categoria..." />
 
-    <script>
-        const produtos = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model));
+<!-- Tabela de produtos -->
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Categoria</th>
+            <th>Estoque</th>
+            <th>Preço</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Nome</td>
+                <td>@item.Categoria</td>
+                <td>@item.Estoque</td>
+                <td>@item.Preco</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Editar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
 
-        document.addEventListener("DOMContentLoaded", () => {
-
-            const categorias = {};
-            produtos.forEach(p => categorias[p.Categoria] = (categorias[p.Categoria] || 0) + 1);
-
-            new Chart(graficoPizza, {
-                type: 'pie',
-                data: { labels: Object.keys(categorias), datasets: [{ data: Object.values(categorias) }] },
-                options: { maintainAspectRatio: false }
-            });
-
-            new Chart(graficoDonut, {
-                type: 'doughnut',
-                data: { labels: produtos.map(p => p.Nome), datasets: [{ data: produtos.map(p => p.Estoque) }] },
-                options: { cutout: '65%', maintainAspectRatio: false }
-            });
-
-            new Chart(graficoBarra, {
-                type: 'bar',
-                data: {
-                    labels: ['Total', 'Estoque >0', 'Críticos'],
-                    datasets: [{
-                        data: [
-                            produtos.length,
-                            produtos.filter(p => p.Estoque > 0).length,
-                            produtos.filter(p => p.Estoque < 5).length
-                        ]
-                    }]
-                },
-                options: {
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true } },
-                    maintainAspectRatio: false
-                }
-            });
+<!-- Scripts no final -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Filtro de tabela
+    document.getElementById("filtro").addEventListener("keyup", function () {
+        var filtro = this.value.toLowerCase();
+        var linhas = document.querySelectorAll("tbody tr");
+        linhas.forEach(function (linha) {
+            var texto = linha.textContent.toLowerCase();
+            linha.style.display = texto.includes(filtro) ? "" : "none";
         });
+    });
 
-        function aplicarFiltros() {
-            const nome = filtroNome.value.toLowerCase();
-            const categoria = filtroCategoria.value;
-            const fornecedor = filtroFornecedor.value;
-            const precoMax = parseFloat(filtroPreco.value);
-            const estoqueMin = parseInt(filtroEstoque.value);
-
-            document.querySelectorAll("#produtosTabela tr").forEach(tr => {
-                const td = tr.children;
-                let ok = true;
-
-                if (nome && !td[1].innerText.toLowerCase().includes(nome)) ok = false;
-                if (categoria && td[2].innerText !== categoria) ok = false;
-                if (fornecedor && td[3].innerText !== fornecedor) ok = false;
-                if (!isNaN(precoMax) && parseFloat(td[5].innerText.replace("R$", "")) > precoMax) ok = false;
-                if (!isNaN(estoqueMin) && parseInt(td[4].innerText) < estoqueMin) ok = false;
-
-                tr.style.display = ok ? "" : "none";
-            });
+    // Agrupamento por categoria
+    var produtos = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model));
+    var categorias = {};
+    produtos.forEach(p => {
+        if (!categorias[p.Categoria]) {
+            categorias[p.Categoria] = { estoque: 0, preco: 0 };
         }
+        categorias[p.Categoria].estoque += p.Estoque;
+        categorias[p.Categoria].preco += p.Preco;
+    });
 
-        function limparFiltros() {
-            filtroNome.value = filtroCategoria.value =
-            filtroFornecedor.value = filtroPreco.value =
-            filtroEstoque.value = "";
-            aplicarFiltros();
-        }
+    var labels = Object.keys(categorias);
+    var estoques = labels.map(c => categorias[c].estoque);
+    var precos = labels.map(c => categorias[c].preco);
 
-        function movimentar(id, tipo) {
+    const optionsBase = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } };
 
-            if (tipo === 'menu') {
-                const op = prompt("Digite: E = Entrada | S = Saída");
-                if (!op) return;
-                tipo = op.toLowerCase() === 'e' ? 'entrada' : 'saida';
-            }
-
-            const q = prompt("Quantidade:");
-            if (!q || isNaN(q) || q <= 0) return;
-
-            fetch(`/Produto/${tipo}?id=${id}&quantidade=${q}`, { method: 'POST' })
-                .then(() => location.reload());
-        }
-    </script>
-}
+    // Gráficos
+    new Chart(document.getElementById("graficoPizza"), { type: "pie", data: { labels, datasets: [{ data: estoques, backgroundColor: ["#FF6384","#36A2EB","#FFCE56","#4CAF50","#9C27B0"] }] }, options: optionsBase });
+    new Chart(document.getElementById("graficoDonut"), { type: "doughnut", data: { labels, datasets: [{ data: precos, backgroundColor: ["#FF6384","#36A2EB","#FFCE56","#4CAF50","#9C27B0"] }] }, options: optionsBase });
+    new Chart(document.getElementById("graficoBarra"), { type: "bar", data: { labels, datasets: [{ label: "Estoque", data: estoques, backgroundColor: "#36A2EB" }] }, options: { ...optionsBase, scales: { y: { beginAtZero: true } } } });
+    new Chart(document.getElementById("graficoLinha"), { type: "line", data: { labels: produtos.map(p => p.Nome), datasets: [{ label: "Estoque", data: produtos.map(p => p.Estoque), borderColor: "#FF6384", backgroundColor: "rgba(255,99,132,0.2)", fill: true, tension: 0.3 }] }, options: optionsBase });
+    new Chart(document.getElementById("graficoRadar"), { type: "radar", data: { labels, datasets: [{ label: "Estoque", data: estoques, borderColor: "#36A2EB", backgroundColor: "rgba(54,162,235,0.2)" }, { label: "Preço", data: precos, borderColor: "#FF6384", backgroundColor: "rgba(255,99,132,0.2)" }] }, options: optionsBase });
+</script>

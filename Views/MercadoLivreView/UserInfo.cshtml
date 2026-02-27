@@ -1,0 +1,13 @@
+﻿@model Newtonsoft.Json.Linq.JObject
+
+<h2>Perfil Mercado Livre</h2>
+
+<table class="table table-striped">
+    <tr><th>ID</th><td>@Model["id"]</td></tr>
+    <tr><th>Nickname</th><td>@Model["nickname"]</td></tr>
+    <tr><th>Email</th><td>@Model["email"]</td></tr>
+    <tr><th>Nome</th><td>@Model["first_name"] @Model["last_name"]</td></tr>
+    <tr><th>CNPJ</th><td>@Model["identification"]?["number"]</td></tr>
+    <tr><th>Reputação</th><td>@Model["seller_reputation"]?["level_id"]</td></tr>
+    <tr><th>Status</th><td>@Model["status"]?["site_status"]</td></tr>
+</table>

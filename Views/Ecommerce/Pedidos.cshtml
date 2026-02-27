@@ -2,7 +2,6 @@
 
 @{
     ViewData["Title"] = "Pedidos Integrados";
-
     var pedidos = Model?.ToList() ?? new List<Kanban.Models.Pedido>();
 }
 
@@ -24,7 +23,6 @@
                 <label class="form-label">Cliente</label>
                 <input type="text" name="cliente" class="form-control" placeholder="Buscar cliente" />
             </div>
-
             <div class="col-md-3">
                 <label class="form-label">Origem</label>
                 <select name="origem" class="form-select">
@@ -34,7 +32,6 @@
                     <option>AliExpress</option>
                 </select>
             </div>
-
             <div class="col-md-3">
                 <label class="form-label">Status</label>
                 <select name="status" class="form-select">
@@ -45,7 +42,6 @@
                     <option>Cancelado</option>
                 </select>
             </div>
-
             <div class="col-md-2 d-grid">
                 <button class="btn btn-primary">
                     <i class="bi bi-funnel"></i> Filtrar
@@ -64,7 +60,6 @@
                 </div>
             </div>
         </div>
-
         <div class="col-md-3">
             <div class="card shadow border-0 bg-success text-white">
                 <div class="card-body text-center">
@@ -73,7 +68,6 @@
                 </div>
             </div>
         </div>
-
         <div class="col-md-3">
             <div class="card shadow border-0 bg-warning text-dark">
                 <div class="card-body text-center">
@@ -82,7 +76,6 @@
                 </div>
             </div>
         </div>
-
         <div class="col-md-3">
             <div class="card shadow border-0 bg-danger text-white">
                 <div class="card-body text-center">
@@ -99,25 +92,23 @@
             <div class="card shadow-sm">
                 <div class="card-body">
                     <h6>Status</h6>
-                    <canvas id="graficoStatus"></canvas>
+                    <canvas id="graficoStatus" style="max-height:200px;"></canvas>
                 </div>
             </div>
         </div>
-
         <div class="col-md-4">
             <div class="card shadow-sm">
                 <div class="card-body">
                     <h6>Origem</h6>
-                    <canvas id="graficoOrigem"></canvas>
+                    <canvas id="graficoOrigem" style="max-height:200px;"></canvas>
                 </div>
             </div>
         </div>
-
         <div class="col-md-4">
             <div class="card shadow-sm">
                 <div class="card-body">
                     <h6>Valor por Status</h6>
-                    <canvas id="graficoValor"></canvas>
+                    <canvas id="graficoValor" style="max-height:200px;"></canvas>
                 </div>
             </div>
         </div>
@@ -143,10 +134,10 @@
                     {
                         var badge = pedido.Status switch
                         {
-                            "Pago" => "success",
-                            "Enviado" => "primary",
-                            "Aguardando envio" => "warning",
-                            "Cancelado" => "danger",
+                                    "Pago" => "success",
+                                    "Enviado" => "primary",
+                                    "Aguardando envio" => "warning",
+                                    "Cancelado" => "danger",
                             _ => "secondary"
                         };
 
@@ -156,20 +147,12 @@
                             <td>@pedido.Cliente</td>
                             <td>@pedido.Data.ToString("dd/MM/yyyy")</td>
                             <td>@pedido.ValorTotal.ToString("C", new System.Globalization.CultureInfo("pt-BR"))</td>
-                            <td>
-                                <span class="badge bg-@badge">@pedido.Status</span>
-                            </td>
+                            <td><span class="badge bg-@badge">@pedido.Status</span></td>
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
-                                    <a asp-action="Detalhes" asp-route-id="@pedido.Id" class="btn btn-info">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                    <a asp-action="AtualizarStatus" asp-route-id="@pedido.Id" class="btn btn-warning">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <a asp-action="ImprimirEtiqueta" asp-route-id="@pedido.Id" class="btn btn-success">
-                                        <i class="bi bi-printer"></i>
-                                    </a>
+                                    <a asp-action="Detalhes" asp-route-id="@pedido.Id" class="btn btn-info"><i class="bi bi-eye"></i></a>
+                                    <a asp-action="AtualizarStatus" asp-route-id="@pedido.Id" class="btn btn-warning"><i class="bi bi-pencil"></i></a>
+                                    <a asp-action="ImprimirEtiqueta" asp-route-id="@pedido.Id" class="btn btn-success"><i class="bi bi-printer"></i></a>
                                 </div>
                             </td>
                         </tr>
@@ -178,44 +161,47 @@
             </table>
         </div>
     </div>
-
 </div>
 
 <!-- CHART.JS -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
     const statusLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(pedidos.GroupBy(p => p.Status).Select(g => g.Key)));
     const statusValues = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(pedidos.GroupBy(p => p.Status).Select(g => g.Count())));
-
     const origemLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(pedidos.GroupBy(p => p.Origem).Select(g => g.Key)));
     const origemValues = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(pedidos.GroupBy(p => p.Origem).Select(g => g.Count())));
+    const valorStatus = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(pedidos.GroupBy(p => p.Status).Select(g => g.Sum(x => x.ValorTotal))));
 
-    const valorStatus = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
-                pedidos.GroupBy(p => p.Status).Select(g => g.Sum(x => x.ValorTotal))
-        ));
-
-    const ctxStatus = document.getElementById('graficoStatus').getContext('2d');
-    new Chart(ctxStatus, {
+    // Gráfico Status
+    new Chart(document.getElementById('graficoStatus'), {
         type: 'pie',
-        data: { labels: statusLabels, datasets: [{ data: statusValues }] },
-        options: { responsive: true, maintainAspectRatio: false }
+        data: { labels: statusLabels, datasets: [{ data: statusValues, backgroundColor: ['#0d6efd','#198754','#ffc107','#dc3545'] }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
     });
 
-    const ctxOrigem = document.getElementById('graficoOrigem').getContext('2d');
-    new Chart(ctxOrigem, {
+    // Gráfico Origem
+    new Chart(document.getElementById('graficoOrigem'), {
         type: 'doughnut',
-        data: { labels: origemLabels, datasets: [{ data: origemValues }] },
-        options: { responsive: true, maintainAspectRatio: false }
+        data: { labels: origemLabels, datasets: [{ data: origemValues, backgroundColor: ['#6610f2','#fd7e14','#20c997'] }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
     });
 
-    const ctxValor = document.getElementById('graficoValor').getContext('2d');
-    new Chart(ctxValor, {
+    // Gráfico Valor por Status
+    new Chart(document.getElementById('graficoValor'), {
         type: 'bar',
-        data: {
-            labels: statusLabels,
-            datasets: [{ label: 'Valor Total', data: valorStatus }]
-        },
-        options: { responsive: true, maintainAspectRatio: false }
+        data: { labels: statusLabels, datasets: [{ label: 'Valor Total', data: valorStatus, backgroundColor: '#0d6efd' }] },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) { return 'R$ ' + value.toLocaleString(); }
+                    }
+                }
+            }
+        }
     });
 </script>

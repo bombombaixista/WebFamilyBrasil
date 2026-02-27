@@ -4,20 +4,23 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Security.Claims;
 
-namespace Kanban.Controllers
+namespace MeuSistema.Controllers
 {
     [Authorize]
     [Route("[controller]")]
     public class ProdutoController : Controller
     {
         private readonly IWebHostEnvironment _env;
+        private readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions { WriteIndented = true };
 
         public ProdutoController(IWebHostEnvironment env)
         {
             _env = env;
         }
 
-        // ===================== HELPERS =====================
+        // =========================
+        // Helpers para pasta do usuário
+        // =========================
         private string GetUserDataPath()
         {
             var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
@@ -34,152 +37,100 @@ namespace Kanban.Controllers
         }
 
         private string GetProdutosFilePath() => Path.Combine(GetUserDataPath(), "produtos.json");
-        private string GetMovFilePath() => Path.Combine(GetUserDataPath(), "movimentacoes.json");
 
-        private List<Produto> LerProdutos()
-        {
-            var path = GetProdutosFilePath();
-            if (!System.IO.File.Exists(path)) System.IO.File.WriteAllText(path, "[]");
-            var json = System.IO.File.ReadAllText(path);
-            return JsonSerializer.Deserialize<List<Produto>>(json) ?? new();
-        }
-
-        private void SalvarProdutos(List<Produto> produtos)
-        {
-            var path = GetProdutosFilePath();
-            var json = JsonSerializer.Serialize(produtos, new JsonSerializerOptions { WriteIndented = true });
-            System.IO.File.WriteAllText(path, json);
-        }
-
-        private List<Movimentacao> LerMovimentacoes()
-        {
-            var path = GetMovFilePath();
-            if (!System.IO.File.Exists(path)) System.IO.File.WriteAllText(path, "[]");
-            var json = System.IO.File.ReadAllText(path);
-            return JsonSerializer.Deserialize<List<Movimentacao>>(json) ?? new();
-        }
-
-        private void SalvarMovimentacoes(List<Movimentacao> movs)
-        {
-            var path = GetMovFilePath();
-            var json = JsonSerializer.Serialize(movs, new JsonSerializerOptions { WriteIndented = true });
-            System.IO.File.WriteAllText(path, json);
-        }
-
-        // ===================== LISTAGEM =====================
+        // =========================
+        // Listagem de produtos
+        // =========================
         [HttpGet]
         public IActionResult Index()
         {
-            return View(LerProdutos());
+            var produtos = CarregarProdutos();
+            return View(produtos); // View tipada com IEnumerable<Produto>
         }
 
-        [HttpGet("Movimentacoes")]
-        public IActionResult Movimentacoes()
-        {
-            return View(LerMovimentacoes());
-        }
-
-        // ===================== CRUD =====================
+        // =========================
+        // Criar produto
+        // =========================
         [HttpGet("Create")]
         public IActionResult Create() => View();
 
         [HttpPost("Create")]
         public IActionResult Create(Produto produto)
         {
-            var produtos = LerProdutos();
-            produto.Id = produtos.Count > 0 ? produtos.Max(p => p.Id) + 1 : 1;
+            var produtos = CarregarProdutos();
+            produto.Id = produtos.Any() ? produtos.Max(p => p.Id) + 1 : 1;
             produtos.Add(produto);
             SalvarProdutos(produtos);
+
+            TempData["Sucesso"] = "Produto criado com sucesso!";
             return RedirectToAction("Index");
         }
 
+        // =========================
+        // Editar produto
+        // =========================
         [HttpGet("Edit/{id}")]
         public IActionResult Edit(int id)
         {
-            var produto = LerProdutos().FirstOrDefault(p => p.Id == id);
+            var produtos = CarregarProdutos();
+            var produto = produtos.FirstOrDefault(p => p.Id == id);
             if (produto == null) return NotFound();
             return View(produto);
         }
 
         [HttpPost("Edit/{id}")]
-        public IActionResult Edit(int id, Produto atualizado)
+        public IActionResult Edit(int id, Produto produtoAtualizado)
         {
-            var produtos = LerProdutos();
+            var produtos = CarregarProdutos();
             var produto = produtos.FirstOrDefault(p => p.Id == id);
             if (produto == null) return NotFound();
 
-            produto.Nome = atualizado.Nome;
-            produto.Categoria = atualizado.Categoria;
-            produto.Fornecedor = atualizado.Fornecedor;
-            produto.Marca = atualizado.Marca;
-            produto.Tamanho = atualizado.Tamanho;
-            produto.Cor = atualizado.Cor;
-            produto.Material = atualizado.Material;
-            produto.Estoque = atualizado.Estoque;
-            produto.Preco = atualizado.Preco;
+            produto.Nome = produtoAtualizado.Nome;
+            produto.Categoria = produtoAtualizado.Categoria;
+            produto.Preco = produtoAtualizado.Preco;
+            produto.Estoque = produtoAtualizado.Estoque;
+            produto.Descricao = produtoAtualizado.Descricao;
+            produto.ImagemUrl = produtoAtualizado.ImagemUrl;
 
             SalvarProdutos(produtos);
+
+            TempData["Sucesso"] = "Produto atualizado com sucesso!";
             return RedirectToAction("Index");
         }
 
-        // ===================== ESTOQUE =====================
-        [HttpPost("Entrada")]
-        public IActionResult Entrada(int id, int quantidade)
+        // =========================
+        // Apagar produto
+        // =========================
+        [HttpPost("Delete/{id}")]
+        public IActionResult Delete(int id)
         {
-            if (quantidade <= 0)
-                return RedirectToAction("Index");
-
-            var produtos = LerProdutos();
+            var produtos = CarregarProdutos();
             var produto = produtos.FirstOrDefault(p => p.Id == id);
-            if (produto == null)
-                return RedirectToAction("Index");
+            if (produto == null) return NotFound();
 
-            produto.Estoque += quantidade;
+            produtos.Remove(produto);
             SalvarProdutos(produtos);
 
-            var movs = LerMovimentacoes();
-            movs.Add(new Movimentacao
-            {
-                Id = movs.Count > 0 ? movs.Max(m => m.Id) + 1 : 1,
-                ProdutoId = id,
-                Tipo = "Entrada",
-                Quantidade = quantidade,
-                Data = DateTime.Now
-            });
-            SalvarMovimentacoes(movs);
-
+            TempData["Sucesso"] = "Produto removido com sucesso!";
             return RedirectToAction("Index");
         }
 
-        [HttpPost("Saida")]
-        public IActionResult Saida(int id, int quantidade)
+        // =========================
+        // Helpers de persistência
+        // =========================
+        private List<Produto> CarregarProdutos()
         {
-            if (quantidade <= 0)
-                return RedirectToAction("Index");
+            var path = GetProdutosFilePath();
+            if (!System.IO.File.Exists(path)) return new List<Produto>();
+            var json = System.IO.File.ReadAllText(path);
+            return JsonSerializer.Deserialize<List<Produto>>(json, _jsonOptions) ?? new List<Produto>();
+        }
 
-            var produtos = LerProdutos();
-            var produto = produtos.FirstOrDefault(p => p.Id == id);
-            if (produto == null)
-                return RedirectToAction("Index");
-
-            if (produto.Estoque < quantidade)
-                return RedirectToAction("Index");
-
-            produto.Estoque -= quantidade;
-            SalvarProdutos(produtos);
-
-            var movs = LerMovimentacoes();
-            movs.Add(new Movimentacao
-            {
-                Id = movs.Count > 0 ? movs.Max(m => m.Id) + 1 : 1,
-                ProdutoId = id,
-                Tipo = "Saída",
-                Quantidade = quantidade,
-                Data = DateTime.Now
-            });
-            SalvarMovimentacoes(movs);
-
-            return RedirectToAction("Index");
+        private void SalvarProdutos(List<Produto> produtos)
+        {
+            var path = GetProdutosFilePath();
+            var json = JsonSerializer.Serialize(produtos, _jsonOptions);
+            System.IO.File.WriteAllText(path, json);
         }
     }
 }

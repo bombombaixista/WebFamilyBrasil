@@ -1,0 +1,29 @@
+﻿<h2>Integração Mercado Livre</h2>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card p-3 shadow">
+            <h5>Total de Pedidos</h5>
+            <h3>@ViewBag.TotalPedidos</h3>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-3 shadow">
+            <h5>Pedidos Pagos</h5>
+            <h3>@ViewBag.PedidosPagos</h3>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-3 shadow">
+            <h5>Erros de Integração</h5>
+            <h3 class="text-danger">@ViewBag.TotalErros</h3>
+        </div>
+    </div>
+</div>
+
+<hr />
+
+<a class="btn btn-primary" href="/IntegracaoMercadoLivre/Logs">Ver Logs</a>
+<a class="btn btn-secondary" href="/IntegracaoMercadoLivre/Monitoramento">Monitoramento</a>

@@ -1,0 +1,290 @@
+[
+  {
+    "Id": 1,
+    "Cliente2Id": "00000000-0000-0000-0000-000000000000",
+    "MarketplaceOrderId": null,
+    "Cliente": null,
+    "ValorTotal": 1000,
+    "Data": "2026-02-25T19:13:14.2751274-03:00",
+    "Status": "Confirmado",
+    "Origem": "Manual",
+    "Endereco": null,
+    "Cidade": null,
+    "Estado": null,
+    "CEP": null,
+    "Transportadora": null,
+    "CodigoRastreamento": null,
+    "DataCriacao": "2026-02-25T22:13:14.2747204Z",
+    "UltimaAtualizacao": null,
+    "JsonOriginal": null,
+    "Cliente2": null,
+    "Itens": [
+      {
+        "Id": 0,
+        "PedidoId": 0,
+        "ProdutoId": 2,
+        "NomeProduto": "Guitarra",
+        "SKU": null,
+        "Quantidade": 1,
+        "PrecoUnitario": 1000,
+        "Pedido": null
+      }
+    ]
+  },
+  {
+    "Id": 2,
+    "Cliente2Id": "00000000-0000-0000-0000-000000000000",
+    "MarketplaceOrderId": null,
+    "Cliente": null,
+    "ValorTotal": 1500,
+    "Data": "2026-02-25T19:42:00.180808-03:00",
+    "Status": "Confirmado",
+    "Origem": "Manual",
+    "Endereco": null,
+    "Cidade": null,
+    "Estado": null,
+    "CEP": null,
+    "Transportadora": null,
+    "CodigoRastreamento": null,
+    "DataCriacao": "2026-02-25T22:42:00.1807914Z",
+    "UltimaAtualizacao": null,
+    "JsonOriginal": null,
+    "Cliente2": null,
+    "Itens": [
+      {
+        "Id": 0,
+        "PedidoId": 0,
+        "ProdutoId": 0,
+        "NomeProduto": "Guitarra Hofma",
+        "SKU": null,
+        "Quantidade": 1,
+        "PrecoUnitario": 1500,
+        "Pedido": null
+      }
+    ]
+  },
+  {
+    "Id": 3,
+    "Cliente2Id": "00000000-0000-0000-0000-000000000000",
+    "MarketplaceOrderId": null,
+    "Cliente": null,
+    "ValorTotal": 1500,
+    "Data": "2026-02-25T19:46:50.5027701-03:00",
+    "Status": "Confirmado",
+    "Origem": "Manual",
+    "Endereco": null,
+    "Cidade": null,
+    "Estado": null,
+    "CEP": null,
+    "Transportadora": null,
+    "CodigoRastreamento": null,
+    "DataCriacao": "2026-02-25T22:46:50.5027477Z",
+    "UltimaAtualizacao": null,
+    "JsonOriginal": null,
+    "Cliente2": null,
+    "Itens": [
+      {
+        "Id": 0,
+        "PedidoId": 0,
+        "ProdutoId": 0,
+        "NomeProduto": "Guitarra Hofma",
+        "SKU": null,
+        "Quantidade": 1,
+        "PrecoUnitario": 1500,
+        "Pedido": null
+      }
+    ]
+  },
+  {
+    "Id": 4,
+    "Cliente2Id": "00000000-0000-0000-0000-000000000000",
+    "MarketplaceOrderId": null,
+    "Cliente": null,
+    "ValorTotal": 1500,
+    "Data": "2026-02-25T19:49:45.9262078-03:00",
+    "Status": "Confirmado",
+    "Origem": "Manual",
+    "Endereco": null,
+    "Cidade": null,
+    "Estado": null,
+    "CEP": null,
+    "Transportadora": null,
+    "CodigoRastreamento": null,
+    "DataCriacao": "2026-02-25T22:49:45.9261932Z",
+    "UltimaAtualizacao": null,
+    "JsonOriginal": null,
+    "Cliente2": null,
+    "Itens": [
+      {
+        "Id": 0,
+        "PedidoId": 0,
+        "ProdutoId": 0,
+        "NomeProduto": "Guitarra Hofma",
+        "SKU": null,
+        "Quantidade": 1,
+        "PrecoUnitario": 1500,
+        "Pedido": null
+      }
+    ]
+  },
+  {
+    "Id": 5,
+    "Cliente2Id": "00000000-0000-0000-0000-000000000000",
+    "MarketplaceOrderId": null,
+    "Cliente": null,
+    "ValorTotal": 1500,
+    "Data": "2026-02-25T19:52:14.2743094-03:00",
+    "Status": "Confirmado",
+    "Origem": "Manual",
+    "Endereco": null,
+    "Cidade": null,
+    "Estado": null,
+    "CEP": null,
+    "Transportadora": null,
+    "CodigoRastreamento": null,
+    "DataCriacao": "2026-02-25T22:52:14.2742861Z",
+    "UltimaAtualizacao": null,
+    "JsonOriginal": null,
+    "Cliente2": null,
+    "Itens": [
+      {
+        "Id": 0,
+        "PedidoId": 0,
+        "ProdutoId": 0,
+        "NomeProduto": "Guitarra Hofma",
+        "SKU": null,
+        "Quantidade": 1,
+        "PrecoUnitario": 1500,
+        "Pedido": null
+      }
+    ]
+  },
+  {
+    "Id": 6,
+    "Cliente2Id": "00000000-0000-0000-0000-000000000000",
+    "MarketplaceOrderId": null,
+    "Cliente": null,
+    "ValorTotal": 1500,
+    "Data": "2026-02-25T19:54:46.2577391-03:00",
+    "Status": "Confirmado",
+    "Origem": "Manual",
+    "Endereco": null,
+    "Cidade": null,
+    "Estado": null,
+    "CEP": null,
+    "Transportadora": null,
+    "CodigoRastreamento": null,
+    "DataCriacao": "2026-02-25T22:54:46.2577236Z",
+    "UltimaAtualizacao": null,
+    "JsonOriginal": null,
+    "Cliente2": null,
+    "Itens": [
+      {
+        "Id": 0,
+        "PedidoId": 0,
+        "ProdutoId": 0,
+        "NomeProduto": "Guitarra Hofma",
+        "SKU": null,
+        "Quantidade": 1,
+        "PrecoUnitario": 1500,
+        "Pedido": null
+      }
+    ]
+  },
+  {
+    "Id": 7,
+    "Cliente2Id": "00000000-0000-0000-0000-000000000000",
+    "MarketplaceOrderId": null,
+    "Cliente": null,
+    "ValorTotal": 200.00,
+    "Data": "2026-02-25T20:08:23.9413558-03:00",
+    "Status": "Confirmado",
+    "Origem": "Manual",
+    "Endereco": null,
+    "Cidade": null,
+    "Estado": null,
+    "CEP": null,
+    "Transportadora": null,
+    "CodigoRastreamento": null,
+    "DataCriacao": "2026-02-25T23:08:23.9413402Z",
+    "UltimaAtualizacao": null,
+    "JsonOriginal": null,
+    "Cliente2": null,
+    "Itens": [
+      {
+        "Id": 0,
+        "PedidoId": 0,
+        "ProdutoId": 1,
+        "NomeProduto": "WebFamily",
+        "SKU": null,
+        "Quantidade": 1,
+        "PrecoUnitario": 200.00,
+        "Pedido": null
+      }
+    ]
+  },
+  {
+    "Id": 8,
+    "Cliente2Id": "00000000-0000-0000-0000-000000000000",
+    "MarketplaceOrderId": null,
+    "Cliente": null,
+    "ValorTotal": 200.00,
+    "Data": "2026-02-25T20:12:00.232338-03:00",
+    "Status": "Confirmado",
+    "Origem": "Manual",
+    "Endereco": null,
+    "Cidade": null,
+    "Estado": null,
+    "CEP": null,
+    "Transportadora": null,
+    "CodigoRastreamento": null,
+    "DataCriacao": "2026-02-25T23:12:00.2323319Z",
+    "UltimaAtualizacao": null,
+    "JsonOriginal": null,
+    "Cliente2": null,
+    "Itens": [
+      {
+        "Id": 0,
+        "PedidoId": 0,
+        "ProdutoId": 1,
+        "NomeProduto": "WebFamily",
+        "SKU": null,
+        "Quantidade": 1,
+        "PrecoUnitario": 200.00,
+        "Pedido": null
+      }
+    ]
+  },
+  {
+    "Id": 9,
+    "Cliente2Id": "00000000-0000-0000-0000-000000000000",
+    "MarketplaceOrderId": null,
+    "Cliente": null,
+    "ValorTotal": 200.00,
+    "Data": "2026-02-25T23:56:01.0247213-03:00",
+    "Status": "Confirmado",
+    "Origem": "Manual",
+    "Endereco": null,
+    "Cidade": null,
+    "Estado": null,
+    "CEP": null,
+    "Transportadora": null,
+    "CodigoRastreamento": null,
+    "DataCriacao": "2026-02-26T02:56:01.0247053Z",
+    "UltimaAtualizacao": null,
+    "JsonOriginal": null,
+    "Cliente2": null,
+    "Itens": [
+      {
+        "Id": 0,
+        "PedidoId": 0,
+        "ProdutoId": 1,
+        "NomeProduto": "WebFamily",
+        "SKU": null,
+        "Quantidade": 1,
+        "PrecoUnitario": 200.00,
+        "Pedido": null
+      }
+    ]
+  }
+]

@@ -35,6 +35,7 @@ builder.Services.AddHostedService<MercadoLivreTokenBackgroundService>();
 // MVC
 // ==========================
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpClient<MercadoLivreService>();
 
 // ==========================
 // Session

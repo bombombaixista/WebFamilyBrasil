@@ -71,6 +71,7 @@ namespace MeuSistema.Controllers
             var pedidos = CarregarPedidos();
             var novoId = pedidos.Any() ? pedidos.Max(p => p.Id) + 1 : 1;
 
+#pragma warning disable CS8601 // Possível atribuição de referência nula.
             var pedido = new Pedido
             {
                 Id = novoId,
@@ -89,6 +90,7 @@ namespace MeuSistema.Controllers
                 Data = DateTime.Now,
                 Status = "Confirmado"
             };
+#pragma warning restore CS8601 // Possível atribuição de referência nula.
 
             pedidos.Add(pedido);
             SalvarPedidos(pedidos);

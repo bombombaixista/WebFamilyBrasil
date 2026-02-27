@@ -1,49 +1,100 @@
-﻿using System.Net.Http;
+﻿using System.Net.Http.Headers;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using Kanban.Models;
 
 namespace Kanban.Services
 {
     public class MercadoLivreService
     {
-        private readonly HttpClient _httpClient;
+        private readonly HttpClient _http;
+        private readonly AppDbContext _context;
 
-        public MercadoLivreService(HttpClient httpClient)
+        public MercadoLivreService(HttpClient http, AppDbContext context)
         {
-            _httpClient = httpClient;
+            _http = http;
+            _context = context;
         }
 
-        public async Task<List<Pedido>> ObterPedidosAsync(string accessToken, string sellerId)
+        public async Task SincronizarPedidosAsync(Cliente2 cliente)
         {
-            var response = await _httpClient.GetAsync(
-                $"https://api.mercadolibre.com/orders/search?seller={sellerId}&access_token={accessToken}");
+            _http.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", cliente.MercadoLivreAccessToken);
 
-            response.EnsureSuccessStatusCode();
+            int offset = 0;
+            int limit = 50;
+            bool continuar = true;
 
-            var json = await response.Content.ReadAsStringAsync();
-
-            using var doc = JsonDocument.Parse(json);
-
-            var pedidos = new List<Pedido>();
-
-            if (doc.RootElement.TryGetProperty("results", out var results))
+            while (continuar)
             {
-                foreach (var item in results.EnumerateArray())
+                var url = $"https://api.mercadolibre.com/orders/search?sort=date_desc&limit={limit}&offset={offset}";
+                var response = await _http.GetAsync(url);
+
+                if (!response.IsSuccessStatusCode)
+                    throw new Exception("Erro ao buscar pedidos no Mercado Livre.");
+
+                var json = await response.Content.ReadAsStringAsync();
+
+                using var doc = JsonDocument.Parse(json);
+                var root = doc.RootElement;
+
+                var results = root.GetProperty("results");
+
+                if (results.GetArrayLength() == 0)
+                    break;
+
+                foreach (var order in results.EnumerateArray())
                 {
-                    var pedido = new Pedido
+                    var orderId = order.GetProperty("id").ToString();
+
+                    var pedidoExistente = await _context.Pedidos
+                        .FirstOrDefaultAsync(p => p.MarketplaceOrderId == orderId);
+
+                    var status = order.GetProperty("status").ToString();
+                    var total = order.GetProperty("total_amount").GetDecimal();
+                    var dataCriacao = order.GetProperty("date_created").GetDateTime();
+                    var clienteNome = order.GetProperty("buyer")
+                                           .GetProperty("nickname").ToString();
+
+                    if (pedidoExistente == null)
                     {
-                        Id = item.GetProperty("id").GetInt64(),
-                        Cliente = item.GetProperty("buyer").GetProperty("nickname").GetString() ?? "",
-                        ValorTotal = item.GetProperty("total_amount").GetDecimal(),
-                        Data = item.GetProperty("date_created").GetDateTime(),
-                        Origem = "Mercado Livre"
-                    };
+                        var novoPedido = new Pedido
+                        {
+                            Cliente2Id = cliente.Id,
+                            MarketplaceOrderId = orderId,
+                            Cliente = clienteNome,
+                            ValorTotal = total,
+                            Data = dataCriacao,
+                            Status = status,
+                            Origem = "MercadoLivre",
+                            JsonOriginal = order.ToString(),
+                            DataCriacao = DateTime.UtcNow
+                        };
 
-                    pedidos.Add(pedido);
+                        _context.Pedidos.Add(novoPedido);
+                    }
+                    else
+                    {
+                        pedidoExistente.Status = status;
+                        pedidoExistente.ValorTotal = total;
+                        pedidoExistente.UltimaAtualizacao = DateTime.UtcNow;
+                        pedidoExistente.JsonOriginal = order.ToString();
+
+                        _context.Pedidos.Update(pedidoExistente);
+                    }
                 }
-            }
 
-            return pedidos;
+                await _context.SaveChangesAsync();
+
+                offset += limit;
+
+                int totalResultados = root.GetProperty("paging")
+                                          .GetProperty("total")
+                                          .GetInt32();
+
+                if (offset >= totalResultados)
+                    continuar = false;
+            }
         }
     }
 }

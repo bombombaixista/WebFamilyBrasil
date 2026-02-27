@@ -1,39 +1,38 @@
-﻿namespace Kanban.Models
+﻿using Kanban.Models;
+namespace Kanban.Models;
+public class Pedido
 {
-    public class Pedido
-    {
-        public long Id { get; set; }
+    public long Id { get; set; }
 
-        public string Cliente { get; set; } = string.Empty;
+    // 🔥 Relacionamento com Cliente2
+    public Guid Cliente2Id { get; set; }
 
-        public decimal ValorTotal { get; set; }
+    public string? MarketplaceOrderId { get; set; }
 
-        public DateTime Data { get; set; } = DateTime.Now;
+    public string Cliente { get; set; } = string.Empty;
 
-        public string Status { get; set; } = "Pendente";
+    public decimal ValorTotal { get; set; }
 
-        // 🔥 Origem do pedido (Shopee, ML, AliExpress, Manual etc)
-        public string Origem { get; set; } = "Manual";
+    public DateTime Data { get; set; }
 
-        // 🔥 Endereço
-        public string? Endereco { get; set; }
-        public string? Cidade { get; set; }
-        public string? Estado { get; set; }
-        public string? CEP { get; set; }
+    public string Status { get; set; } = "Pendente";
 
-        // 🔥 Envio
-        public string? Transportadora { get; set; }
-        public string? CodigoRastreamento { get; set; }
+    public string Origem { get; set; } = "Manual";
 
-        public List<ItemPedido> Itens { get; set; } = new();
-    }
+    public string? Endereco { get; set; }
+    public string? Cidade { get; set; }
+    public string? Estado { get; set; }
+    public string? CEP { get; set; }
 
-    public class ItemPedido
-    {
-        public long ProdutoId { get; set; }
-        public string NomeProduto { get; set; } = string.Empty;
-        public string? SKU { get; set; }
-        public int Quantidade { get; set; }
-        public decimal PrecoUnitario { get; set; }
-    }
+    public string? Transportadora { get; set; }
+    public string? CodigoRastreamento { get; set; }
+
+    public DateTime DataCriacao { get; set; } = DateTime.UtcNow;
+    public DateTime? UltimaAtualizacao { get; set; }
+
+    public string? JsonOriginal { get; set; }
+
+    public Cliente2 Cliente2 { get; set; } = null!;
+
+    public List<ItemPedido> Itens { get; set; } = new();
 }

@@ -1,0 +1,143 @@
+﻿@using System.Linq
+@using System.Text.Json
+@model IEnumerable<Kanban.Models.AfiliadoProduto>
+
+<h2>Produtos Afiliados</h2>
+
+<!-- Cards no topo -->
+<div class="d-flex justify-content-center gap-4 mb-4">
+    <div class="card text-center bg-primary text-white" style="width:260px; height:140px;">
+        <div class="card-body d-flex flex-column justify-content-center">
+            <h6 class="card-title">Total de Produtos</h6>
+            <h3>@(Model?.Count() ?? 0)</h3>
+        </div>
+    </div>
+    <div class="card text-center bg-success text-white" style="width:260px; height:140px;">
+        <div class="card-body d-flex flex-column justify-content-center">
+            <h6 class="card-title">Preço Médio</h6>
+            <h3>R$ @(Model != null && Model.Any() ? Model.Average(p => p.Preco).ToString("N2") : "0,00")</h3>
+        </div>
+    </div>
+    <div class="card text-center bg-warning text-dark" style="width:260px; height:140px;">
+        <div class="card-body d-flex flex-column justify-content-center">
+            <h6 class="card-title">Produto Mais Caro</h6>
+            <h3>R$ @(Model != null && Model.Any() ? Model.Max(p => p.Preco).ToString("N2") : "0,00")</h3>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form class="row g-3">
+            <div class="col-md-6">
+                <label for="nomeProduto" class="form-label">Nome do Produto</label>
+                <input type="text" id="nomeProduto" class="form-control" placeholder="Buscar por nome..." />
+            </div>
+            <div class="col-md-6 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Gráficos -->
+<div class="d-flex justify-content-center gap-4 mb-4">
+    <div class="card text-center" style="width:220px;">
+        <div class="card-body">
+            <h6 class="card-title">Distribuição de Preços</h6>
+            <canvas id="graficoPizza" width="200" height="200"></canvas>
+        </div>
+    </div>
+    <div class="card text-center" style="width:220px;">
+        <div class="card-body">
+            <h6 class="card-title">Produtos</h6>
+            <canvas id="graficoDonut" width="200" height="200"></canvas>
+        </div>
+    </div>
+    <div class="card text-center" style="width:220px;">
+        <div class="card-body">
+            <h6 class="card-title">Preços</h6>
+            <canvas id="graficoBarras" width="200" height="200"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Tabela -->
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Imagem</th>
+            <th>Nome</th>
+            <th>Preço</th>
+            <th>Link de Afiliado</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var produto in Model ?? Enumerable.Empty<Kanban.Models.AfiliadoProduto>())
+        {
+            <tr>
+                <td><img src="@produto.ImagemUrl" width="100" /></td>
+                <td>@produto.Nome</td>
+                <td>R$ @produto.Preco.ToString("N2")</td>
+                <td><a href="@produto.LinkAfiliado" target="_blank">@produto.LinkAfiliado</a></td>
+                <td><button class="btn btn-primary">Copiar Link</button></td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // 🔹 Arrays preparados no Razor
+        var nomes = @Html.Raw(JsonSerializer.Serialize(Model?.Select(p => p.Nome) ?? new List<string>()));
+        var precos = @Html.Raw(JsonSerializer.Serialize(Model?.Select(p => p.Preco) ?? new List<decimal>()));
+
+        // Gráfico Pizza - Distribuição de Preços
+        new Chart(document.getElementById('graficoPizza'), {
+            type: 'pie',
+            data: {
+                labels: ['Baratos', 'Médios', 'Caros'],
+                datasets: [{
+                    data: [
+                        @(Model?.Count(p => p.Preco < 100) ?? 0),
+                        @(Model?.Count(p => p.Preco >= 100 && p.Preco < 500) ?? 0),
+                        @(Model?.Count(p => p.Preco >= 500) ?? 0)
+                    ],
+                    backgroundColor: ['#007bff', '#28a745', '#ffc107']
+                }]
+            }
+        });
+
+        // Gráfico Donut - Produtos por Nome
+        new Chart(document.getElementById('graficoDonut'), {
+            type: 'doughnut',
+            data: {
+                labels: nomes,
+                datasets: [{
+                    data: precos,
+                    backgroundColor: ['#17a2b8', '#6f42c1', '#fd7e14', '#20c997', '#dc3545']
+                }]
+            }
+        });
+
+        // Gráfico Barras - Preços
+        new Chart(document.getElementById('graficoBarras'), {
+            type: 'bar',
+            data: {
+                labels: nomes,
+                datasets: [{
+                    label: 'Preço',
+                    data: precos,
+                    backgroundColor: '#20c997'
+                }]
+            },
+            options: {
+                responsive: false,
+                maintainAspectRatio: false
+            }
+        });
+    </script>
+}

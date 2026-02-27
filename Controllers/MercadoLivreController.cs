@@ -1,5 +1,7 @@
 ﻿using Kanban.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Text;
+using System.Text.Json;
 
 namespace Kanban.Controllers
 {
@@ -78,6 +80,33 @@ namespace Kanban.Controllers
             catch (Exception ex)
             {
                 return BadRequest($"Erro ao buscar pedidos: {ex.Message}");
+            }
+        }
+
+        // 🔹 Criar anúncio
+        [HttpPost("CriarAnuncio")]
+        public async Task<IActionResult> CriarAnuncio(Guid clienteId, [FromBody] object anuncio)
+        {
+            try
+            {
+                var token = await _mercadoLivreTokenService.GetValidTokenAsync(clienteId);
+                var httpClient = _httpClientFactory.CreateClient();
+
+                var json = JsonSerializer.Serialize(anuncio);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await httpClient.PostAsync(
+                    $"https://api.mercadolibre.com/items?access_token={token.AccessToken}",
+                    content
+                );
+                response.EnsureSuccessStatusCode();
+
+                var result = await response.Content.ReadAsStringAsync();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Erro ao criar anúncio: {ex.Message}");
             }
         }
     }

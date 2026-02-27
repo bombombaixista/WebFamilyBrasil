@@ -1,0 +1,23 @@
+﻿@model Newtonsoft.Json.Linq.JObject
+
+<h2>Produtos do Mercado Livre</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Título</th>
+            <th>Preço</th>
+            <th>Link</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model["results"])
+        {
+            <tr>
+                <td>@item["title"]</td>
+                <td>R$ @item["price"]</td>
+                <td><a href="@item["permalink"]" target="_blank">Ver produto</a></td>
+            </tr>
+        }
+    </tbody>
+</table>

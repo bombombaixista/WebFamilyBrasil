@@ -6,7 +6,9 @@ public class AppDbContext : DbContext
     public DbSet<Cliente2> Clientes2 { get; set; }
     public DbSet<Plano> Planos { get; set; }
     public DbSet<Cobranca> Cobrancas { get; set; }
-
+    public DbSet<Pedido> Pedidos { get; set; }
+    public DbSet<ItemPedido> ItensPedido { get; set; }
+    public DbSet<LogIntegracao> LogIntegracoes { get; set; }
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -40,6 +42,20 @@ public class AppDbContext : DbContext
                   .WithMany()
                   .HasForeignKey(c => c.PlanoId)
                   .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Pedido>()
+    .HasOne(p => p.Cliente2)
+    .WithMany()
+    .HasForeignKey(p => p.Cliente2Id)
+    .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ItemPedido>()
+                .HasOne(i => i.Pedido)
+                .WithMany(p => p.Itens)
+                .HasForeignKey(i => i.PedidoId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Pedido>()
+                .HasIndex(p => p.MarketplaceOrderId);
         });
 
         // Plano

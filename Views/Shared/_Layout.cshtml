@@ -25,20 +25,73 @@
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item"><a class="nav-link" href="/Pipeline">Vendas</a></li>
                     <li class="nav-item"><a class="nav-link" href="/Tarefas">Tarefas</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/Produto">Estoque</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/Pedidos/Index">Pedidos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/Ecommerce/Index">e-commerce</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/Fornecedor">Fornecedores</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/Financeiro">Financeiro</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/Dashboard/Index">Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/Agenda">Agenda</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/Clientes">Cadastro</a></li>
-                    
-                    <li class="nav-item"><a class="nav-link" href="/Funcionario">Funcionários</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/Backup">Backup</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/Checkout/Index">Checkout</a></li>
+
+                    <!-- 🔹 Dropdown de E-commerce -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="ecommerceDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-cart3"></i> E-commerce
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="ecommerceDropdown">
+                            <li>@Html.ActionLink("Produtos", "Index", "Produto", null, new { @class = "dropdown-item" })</li>
+                            <li>@Html.ActionLink("Pedidos", "Index", "Pedidos", null, new { @class = "dropdown-item" })</li>
+                            <li>@Html.ActionLink("Loja Online", "Index", "Ecommerce", null, new { @class = "dropdown-item" })</li>
+                            <li>@Html.ActionLink("Fornecedores", "Index", "Fornecedor", null, new { @class = "dropdown-item" })</li>
+                            <li>@Html.ActionLink("MercadoLivre", "Index", "IntegracaoMercadoLivre", null, new { @class = "dropdown-item" })</li>
+                        </ul>
+                    </li>
+
+                    <!-- 🔹 Dropdown de Dashboard & Financeiro -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="dashboardFinanceiroDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-bar-chart-line"></i> Dashboard & Financeiro
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="dashboardFinanceiroDropdown">
+                            <li>@Html.ActionLink("Dashboard", "Index", "Dashboard", null, new { @class = "dropdown-item" })</li>
+                            <li>@Html.ActionLink("Financeiro", "Index", "Financeiro", null, new { @class = "dropdown-item" })</li>
+                        </ul>
+                    </li>
+
+                    <!-- 🔹 Dropdown de Afiliados -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="afiliadosDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-link-45deg"></i> Afiliados
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="afiliadosDropdown">
+                            <li>@Html.ActionLink("Produtos", "Produtos", "Afiliados", null, new { @class = "dropdown-item" })</li>
+                            <li>@Html.ActionLink("Links", "Links", "Afiliados", null, new { @class = "dropdown-item" })</li>
+                            <li>@Html.ActionLink("Campanhas", "Campanhas", "Afiliados", null, new { @class = "dropdown-item" })</li>
+                            <li>@Html.ActionLink("Relatórios", "Relatorios", "Afiliados", null, new { @class = "dropdown-item" })</li>
+                            <li>@Html.ActionLink("Configurações", "Configuracoes", "Afiliados", null, new { @class = "dropdown-item" })</li>
+                        </ul>
+                    </li>
+
+                    <!-- 🔹 Dropdown de Gestão -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="gestaoDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-people"></i> Gestão
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="gestaoDropdown">
+                            <li>@Html.ActionLink("Agenda", "Index", "Agenda", null, new { @class = "dropdown-item" })</li>
+                            <li>@Html.ActionLink("Documento", "Index", "Documento", null, new { @class = "dropdown-item" })</li>
+                            <li>@Html.ActionLink("Cadastro", "Index", "Clientes", null, new { @class = "dropdown-item" })</li>
+                            <li>@Html.ActionLink("Funcionários", "Index", "Funcionario", null, new { @class = "dropdown-item" })</li>
+                            <li>@Html.ActionLink("RH", "Index", "RH", null, new { @class = "dropdown-item" })</li>
+                        </ul>
+                    </li>
+
+                    <!-- 🔹 Dropdown de Sistema -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="sistemaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-gear"></i> Sistema
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="sistemaDropdown">
+                            <li>@Html.ActionLink("Backup", "Index", "Backup", null, new { @class = "dropdown-item" })</li>
+                            <li>@Html.ActionLink("Checkout", "Index", "Checkout", null, new { @class = "dropdown-item" })</li>
+                        </ul>
+                    </li>
+
+                    <!-- Logout -->
                     <li class="nav-item"><a class="nav-link" href="/Login/Logout">Logout</a></li>
-                    
                 </ul>
             </div>
         </div>
@@ -53,5 +106,7 @@
 
     <!-- Bootstrap JS para o hamburguer funcionar -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap Icons (para ícones de carrinho, gráfico, link, pessoas e engrenagem) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
 </body>
 </html>

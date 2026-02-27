@@ -1,0 +1,20 @@
+﻿<h2>Monitoramento - Mercado Livre</h2>
+
+<div style="width:400px;">
+    <canvas id="grafico"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var ctx = document.getElementById('grafico');
+
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Sucesso Hoje', 'Erro Hoje'],
+            datasets: [{
+                data: [@ViewBag.SucessoHoje, @ViewBag.ErroHoje]
+            }]
+        }
+    });
+</script>

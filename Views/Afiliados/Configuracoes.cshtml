@@ -1,0 +1,44 @@
+﻿@model string
+@{
+    ViewBag.Title = "Configurações de Afiliados";
+}
+
+<h2>Configurações de Afiliados</h2>
+
+<!-- 🔹 Cards de métricas principais -->
+<div class="d-flex justify-content-center gap-4 mb-4">
+    <div class="card text-center bg-primary text-white" style="width:260px; height:140px;">
+        <div class="card-body d-flex flex-column justify-content-center">
+            <h6 class="card-title">Affiliate ID Atual</h6>
+            <h5>@(ViewBag.AfiliateId ?? "Não definido")</h5>
+        </div>
+    </div>
+
+    <div class="card text-center bg-success text-white" style="width:260px; height:140px;">
+        <div class="card-body d-flex flex-column justify-content-center">
+            <h6 class="card-title">Última Atualização</h6>
+            <h5>@DateTime.Now.ToShortDateString()</h5>
+        </div>
+    </div>
+
+    <div class="card text-center bg-warning text-dark" style="width:260px; height:140px;">
+        <div class="card-body d-flex flex-column justify-content-center">
+            <h6 class="card-title">Status</h6>
+            <h5>@(string.IsNullOrEmpty(ViewBag.AfiliateId) ? "Pendente" : "Ativo")</h5>
+        </div>
+    </div>
+</div>
+
+<!-- 🔹 Formulário -->
+<div class="card">
+    <div class="card-body">
+        <form method="post">
+            <div class="form-group mb-3">
+                <label for="affiliateId">Seu Affiliate ID:</label>
+                <input type="text" id="affiliateId" name="affiliateId" class="form-control" value="@ViewBag.AfiliateId" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Salvar</button>
+        </form>
+    </div>
+</div>
