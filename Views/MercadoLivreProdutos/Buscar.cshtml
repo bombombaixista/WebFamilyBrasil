@@ -1,22 +1,28 @@
-﻿@model Newtonsoft.Json.Linq.JObject
+﻿@model List<Kanban.Models.AfiliadoProduto>
 
 <h2>Produtos do Mercado Livre</h2>
 
 <table class="table table-striped">
     <thead>
         <tr>
+            <th>Imagem</th>
             <th>Título</th>
             <th>Preço</th>
             <th>Link</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model["results"])
+        @foreach (var produto in Model)
         {
             <tr>
-                <td>@item["title"]</td>
-                <td>R$ @item["price"]</td>
-                <td><a href="@item["permalink"]" target="_blank">Ver produto</a></td>
+                <td>
+                    <img src="@(produto.ImagemUrl ?? "/images/placeholder.png")"
+                         alt="Imagem do produto" width="80" />
+                </td>
+
+                <td>@produto.Titulo</td>
+                <td>R$ @produto.Preco</td>
+                <td><a href="@produto.LinkAfiliado" target="_blank">Ver produto</a></td>
             </tr>
         }
     </tbody>

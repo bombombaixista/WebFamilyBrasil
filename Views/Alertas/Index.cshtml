@@ -1,0 +1,27 @@
+﻿@model List<Kanban.DTOs.AlertaDto>
+
+@{
+    ViewData["Title"] = "Alertas do Sistema";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (!Model.Any())
+{
+    <p>Nenhum alerta ativo.</p>
+}
+else
+{
+    <ul class="list-group">
+        @foreach (var alerta in Model)
+        {
+            <li class="list-group-item">
+                <strong>@alerta.Data.ToString("dd/MM/yyyy HH:mm")</strong> - @alerta.Mensagem
+                @if (!alerta.Resolvido)
+                {
+                    <span class="badge bg-danger">Pendente</span>
+                }
+            </li>
+        }
+    </ul>
+}

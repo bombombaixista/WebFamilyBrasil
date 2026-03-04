@@ -1,0 +1,27 @@
+﻿@model List<Kanban.DTOs.EstatisticaCampanhaDto>
+
+<h2>Estatísticas por Campanha</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Campanha</th>
+            <th>Produtos</th>
+            <th>Cliques</th>
+            <th>Conversões</th>
+            <th>Receita Gerada</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Nome</td>
+                <td>@item.Produtos</td>
+                <td>@item.Cliques</td>
+                <td>@item.Conversoes</td>
+                <td>@item.ReceitaGerada.ToString("C")</td>
+            </tr>
+        }
+    </tbody>
+</table>

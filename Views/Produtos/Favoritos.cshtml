@@ -1,0 +1,23 @@
+﻿@model List<Kanban.Models.AfiliadoProduto>
+
+@{
+    ViewData["Title"] = "Produtos Favoritos";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="row">
+    @foreach (var produto in Model)
+    {
+        <div class="col-md-3">
+            <div class="card mb-3">
+                <img src="@produto.ImagemUrl" class="card-img-top" alt="@produto.Nome" />
+                <div class="card-body">
+                    <h5 class="card-title">@produto.Nome</h5>
+                    <p class="card-text">@produto.Preco.ToString("C")</p>
+                    <a href="@produto.LinkAfiliado" class="btn btn-primary" target="_blank">Comprar</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>

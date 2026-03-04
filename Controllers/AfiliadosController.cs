@@ -1,89 +1,88 @@
-﻿using Kanban.Models;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-
+﻿using Microsoft.AspNetCore.Mvc;
+using System.Net.Http;
+using System.Text.Json;
 
 namespace Kanban.Controllers
 {
     public class AfiliadosController : Controller
     {
-        // Lista de produtos afiliados
-        public ActionResult Produtos()
+        private readonly HttpClient _http;
+
+        public AfiliadosController(HttpClient http)
         {
-            var produtos = new List<AfiliadoProduto>
+            _http = http;
+        }
+
+        // GET: /Afiliados/Produtos
+        public async Task<IActionResult> Produtos()
+        {
+            var listaProdutos = new List<object>();
+            var url = "https://api.mercadolibre.com/users/me/items/search"; // substitua pela sua URL real ou LinkTree
+
+            try
             {
-                new AfiliadoProduto
+                var res = await _http.GetStringAsync(url);
+                var json = JsonDocument.Parse(res);
+
+                if (json.RootElement.TryGetProperty("results", out var results))
                 {
-                    Id = 1,
-                    Nome = "Fone de Ouvido Sem Fio",
-                    Preco = 199.90m,
-                    ImagemUrl = "/imagens/fone.jpg",
-                    LinkAfiliado = "https://mercadolivre.com.br/fone?affiliate_id=SEU_ID"
-                },
-                new AfiliadoProduto
-                {
-                    Id = 2,
-                    Nome = "Smartphone XYZ",
-                    Preco = 1499.00m,
-                    ImagemUrl = "/imagens/smartphone.jpg",
-                    LinkAfiliado = "https://mercadolivre.com.br/smartphone?affiliate_id=SEU_ID"
+                    foreach (var item in results.EnumerateArray())
+                    {
+                        listaProdutos.Add(new
+                        {
+                            Id = item.GetProperty("id").GetString(),
+                            Title = item.GetProperty("title").GetString(),
+                            Link = $"https://www.mercadolivre.com.br/{item.GetProperty("id").GetString()}"
+                        });
+                    }
                 }
-            };
-
-            return View(produtos);
-        }
-
-        // Gerador de links
-        public ActionResult Links()
-        {
-            ViewBag.LinkGerado = "https://mercadolivre.com.br/produto?affiliate_id=SEU_ID";
-            return View();
-        }
-
-        // Campanhas promocionais
-        public ActionResult Campanhas()
-        {
-            ViewBag.Campanhas = new List<string>
+            }
+            catch
             {
-                "Campanha de Carnaval - até 20% de comissão",
-                "Campanha de Eletrônicos - bônus especial"
-            };
+                listaProdutos.Add(new { Id = "0", Title = "Nenhum produto encontrado", Link = "#" });
+            }
 
-            return View();
+            return View(listaProdutos);
         }
 
-        // Relatórios de desempenho
-        public ActionResult Relatorios()
+        // GET: /Afiliados/Links
+        public IActionResult Links()
         {
-            var relatorios = new List<RelatorioAfiliado>
+            var links = new List<object>
             {
-                new RelatorioAfiliado
-                {
-                    Data = DateTime.Now.AddDays(-1),
-                    Produto = "Fone de Ouvido Sem Fio",
-                    Cliques = 120,
-                    Vendas = 8,
-                    Comissao = 150.75m
-                },
-                new RelatorioAfiliado
-                {
-                    Data = DateTime.Now.AddDays(-2),
-                    Produto = "Smartphone XYZ",
-                    Cliques = 200,
-                    Vendas = 15,
-                    Comissao = 1200.00m
-                }
+                new { Nome="LinkTree", Url="https://linktr.ee/seu_usuario" },
+                new { Nome="Promoções", Url="https://www.mercadolivre.com.br/ofertas" }
             };
+            return View(links);
+        }
 
+        // GET: /Afiliados/Campanhas
+        public IActionResult Campanhas()
+        {
+            var campanhas = new List<object>
+            {
+                new { Nome="Campanha 1", Status="Ativa", Vendas=120 },
+                new { Nome="Campanha 2", Status="Finalizada", Vendas=250 }
+            };
+            return View(campanhas);
+        }
+
+        // GET: /Afiliados/Relatorios
+        public IActionResult Relatorios()
+        {
+            var relatorios = new List<object>
+            {
+                new { Nome="Relatório 1", Cliques=150, Conversao=12 },
+                new { Nome="Relatório 2", Cliques=300, Conversao=18 }
+            };
             return View(relatorios);
         }
 
-        // Configurações
-        public ActionResult Configuracoes()
+        // GET: /Afiliados/Configuracoes
+        public IActionResult Configuracoes()
         {
-            ViewBag.AfiliateId = "SEU_ID";
-            return View();
+            var config = new { Notificacoes = true, Pagamento = "Pix", Tema = "Claro" };
+            return View(config);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Kanban.Model;
+﻿using Kanban.Controllers;
+using Kanban.Model;
 using Kanban.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +30,10 @@ builder.Services.AddScoped<MercadoLivreTokenService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<MercadoPagoService>();
 builder.Services.AddHostedService<MercadoLivreTokenBackgroundService>();
+builder.Services.AddHttpClient<BolsaService>();
+builder.Services.AddHttpClient<AfiliadosController>();
+
+
 
 
 // ==========================

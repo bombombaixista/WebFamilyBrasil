@@ -1,0 +1,224 @@
+﻿@model List<Kanban.Models.AtivoFinanceiro>
+
+@{
+    var usd = Model.FirstOrDefault(x => x.Simbolo == "USD");
+    var ibov = Model.FirstOrDefault(x => x.Simbolo == "IBOV");
+    var btc = Model.FirstOrDefault(x => x.Simbolo == "BTC");
+
+    decimal score = 5m;
+
+    if (usd != null) score -= usd.Variacao;
+    if (ibov != null) score += ibov.Variacao;
+    if (btc != null) score += btc.Variacao * 0.2m;
+
+    score = Math.Clamp(score, 0m, 10m);
+
+    string clima = score >= 7m ? "Oportunidade"
+                 : score >= 4m ? "Atenção"
+                 : "Risco Elevado";
+
+    string corClima = score >= 7m ? "success"
+                    : score >= 4m ? "warning"
+                    : "danger";
+
+    string analise = "";
+
+    if (usd != null && usd.Variacao > 1)
+        analise += "Dólar pressionando custos de importação. ";
+
+    if (ibov != null && ibov.Variacao > 1)
+        analise += "Mercado em alta indica otimismo geral. ";
+
+    if (btc != null && Math.Abs(btc.Variacao) > 3)
+        analise += "Alta volatilidade em criptoativos. ";
+
+    if (string.IsNullOrEmpty(analise))
+        analise = "Cenário relativamente estável no momento.";
+}
+
+<style>
+    body {
+        background-color: #0f172a;
+    }
+
+    .card {
+        background-color: #1e293b;
+        color: #f1f5f9;
+        border-radius: 16px;
+        animation: fadeIn 0.8s ease-in-out;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .titulo {
+        color: #f8fafc;
+    }
+
+    .subtitulo {
+        color: #94a3b8;
+    }
+
+    .score-glow {
+        font-size: 70px;
+        font-weight: 700;
+        text-shadow: 0 0 20px rgba(34,197,94,0.6);
+    }
+
+    .text-warning.score-glow {
+        text-shadow: 0 0 20px rgba(234,179,8,0.6);
+    }
+
+    .text-danger.score-glow {
+        text-shadow: 0 0 20px rgba(239,68,68,0.6);
+    }
+
+    .progress {
+        background-color: #334155;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+
+    <!-- SCORE -->
+    <div class="card shadow-lg mb-4">
+        <div class="card-body text-center">
+
+            <h2 class="titulo fw-bold">WebFamily Intelligence</h2>
+            <p class="subtitulo">Radar Estratégico Econômico</p>
+
+            <div class="score-glow text-@corClima">
+                @score.ToString("0.0") <span style="font-size:22px;">/10</span>
+            </div>
+
+            <h4 class="text-@corClima">@clima</h4>
+
+            <div class="progress mt-3" style="height:12px;">
+                <div class="progress-bar bg-@corClima"
+                     style="width:@(score * 10)%">
+                </div>
+            </div>
+
+            <div class="mt-4 p-3 rounded" style="background:#0f172a;">
+                <strong>Análise Inteligente:</strong><br />
+                @analise
+            </div>
+
+        </div>
+    </div>
+
+    <!-- INDICADORES -->
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body text-center">
+
+                        <h6 class="subtitulo">@item.Nome</h6>
+
+                        <h3 class="fw-bold">
+                            @item.Preco.ToString("N2")
+                        </h3>
+
+                        <span class="fw-bold @(item.Variacao >= 0 ? "text-success" : "text-danger")">
+                            @(item.Variacao >= 0 ? "▲ +" : "▼ ")@item.Variacao %
+                        </span>
+
+                        <div class="small mt-2 subtitulo">
+                            Atualizado: @item.AtualizadoEm.ToString("HH:mm")
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- GRÁFICO PRINCIPAL -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <h5 class="fw-bold">Comparativo de Variação (%)</h5>
+            <canvas id="graficoVariacao"></canvas>
+        </div>
+    </div>
+
+    <!-- MINI HISTÓRICO SIMULADO -->
+    <div class="card shadow">
+        <div class="card-body">
+            <h6 class="fw-bold">Tendência Simulada do Dia</h6>
+            <canvas id="miniHistorico"></canvas>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    new Chart(document.getElementById('graficoVariacao'), {
+        type: 'bar',
+        data: {
+            labels: [
+                @foreach (var item in Model)
+                {
+                        @: "@item.Nome",
+                }
+            ],
+            datasets: [{
+                label: 'Variação %',
+                data: [
+                    @foreach (var item in Model)
+                    {
+                            @: @item.Variacao.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                    }
+                ],
+                borderRadius: 8
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { labels: { color: '#f1f5f9' } }
+            },
+            scales: {
+                x: { ticks: { color: '#cbd5e1' }, grid: { color: '#334155' } },
+                y: { ticks: { color: '#cbd5e1' }, grid: { color: '#334155' } }
+            }
+        }
+    });
+
+    new Chart(document.getElementById('miniHistorico'), {
+        type: 'line',
+        data: {
+            labels: ['09h','11h','13h','15h','17h'],
+            datasets: [{
+                label: 'Score Diário',
+                data: [4.5,5.2,6.1,7.0,@score.ToString(System.Globalization.CultureInfo.InvariantCulture)],
+                tension: 0.4
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { labels: { color: '#f1f5f9' } }
+            },
+            scales: {
+                x: { ticks: { color: '#cbd5e1' }, grid: { color: '#334155' } },
+                y: { ticks: { color: '#cbd5e1' }, grid: { color: '#334155' } }
+            }
+        }
+    });
+
+    // Auto refresh a cada 60 segundos
+    setTimeout(function(){
+        location.reload();
+    }, 60000);
+</script>

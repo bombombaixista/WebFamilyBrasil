@@ -1,7 +1,6 @@
 ﻿using Kanban.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Kanban.Controllers
 {
@@ -10,51 +9,30 @@ namespace Kanban.Controllers
     public class IntegracoesController : Controller
     {
         private readonly MercadoLivreService _mlService;
-        private readonly AppDbContext _context;
 
-        public IntegracoesController(
-            MercadoLivreService mlService,
-            AppDbContext context)
+        public IntegracoesController(MercadoLivreService mlService)
         {
             _mlService = mlService;
-            _context = context;
         }
 
         // ===============================
-        // 🔄 SINCRONIZAR PEDIDOS ML
+        // 🔄 BUSCAR PRODUTOS DO MERCADO LIVRE
         // ===============================
         [HttpPost("SincronizarMercadoLivre")]
-        public async Task<IActionResult> SincronizarMercadoLivre()
+        public async Task<IActionResult> SincronizarMercadoLivre(string query = "tenis", int limit = 20)
         {
             try
             {
-                // 🔐 Pegar email do usuário logado
-                var email = User.Claims
-                    .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                // Consulta produtos em tempo real
+                var produtos = await _mlService.BuscarProdutosAsync(query, limit);
 
-                if (string.IsNullOrEmpty(email))
-                    return Unauthorized("Usuário não identificado.");
-
-                // 🔎 Buscar Cliente2 no banco
-                var cliente = _context.Clientes2
-                    .FirstOrDefault(c => c.Email == email);
-
-                if (cliente == null)
-                    return NotFound("Cliente não encontrado no banco.");
-
-                if (string.IsNullOrEmpty(cliente.MercadoLivreAccessToken))
-                    return BadRequest("Token de acesso não encontrado.");
-
-                // 🔄 Sincronizar
-                await _mlService.SincronizarPedidosAsync(cliente);
-
-                TempData["Sucesso"] = "Pedidos sincronizados com sucesso!";
-                return RedirectToAction("Index", "Pedidos");
+                TempData["Sucesso"] = $"Foram carregados {produtos.Count} produtos do Mercado Livre!";
+                return RedirectToAction("ProdutosAfiliados", "Afiliados");
             }
             catch (Exception ex)
             {
-                TempData["Erro"] = "Erro ao sincronizar: " + ex.Message;
-                return RedirectToAction("Index", "Pedidos");
+                TempData["Erro"] = "Erro ao buscar produtos: " + ex.Message;
+                return RedirectToAction("ProdutosAfiliados", "Afiliados");
             }
         }
     }

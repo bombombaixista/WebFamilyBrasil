@@ -318,5 +318,37 @@
         "Pedido": null
       }
     ]
+  },
+  {
+    "Id": 11,
+    "Cliente2Id": "00000000-0000-0000-0000-000000000000",
+    "MarketplaceOrderId": null,
+    "Cliente": null,
+    "ValorTotal": 700,
+    "Data": "2026-03-02T05:52:16.2643487-03:00",
+    "Status": "Confirmado",
+    "Origem": "Manual",
+    "Endereco": null,
+    "Cidade": null,
+    "Estado": null,
+    "CEP": null,
+    "Transportadora": null,
+    "CodigoRastreamento": null,
+    "DataCriacao": "2026-03-02T08:52:16.2643334Z",
+    "UltimaAtualizacao": null,
+    "JsonOriginal": null,
+    "Cliente2": null,
+    "Itens": [
+      {
+        "Id": 0,
+        "PedidoId": 0,
+        "ProdutoId": 4,
+        "NomeProduto": "Audiophile 24/96",
+        "SKU": null,
+        "Quantidade": 1,
+        "PrecoUnitario": 700,
+        "Pedido": null
+      }
+    ]
   }
 ]

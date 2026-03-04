@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Security.Claims;
 
-namespace MeuSistema.Controllers
+namespace Kanban.Controllers
 {
     [Authorize]
     [Route("[controller]")]

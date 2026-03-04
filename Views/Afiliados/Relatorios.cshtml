@@ -1,142 +1,26 @@
-﻿@using System.Linq
-@model IEnumerable<Kanban.Models.RelatorioAfiliado>
+﻿@model List<dynamic>
+@{
+    ViewData["Title"] = "Relatórios";
+}
 
-<h2>Relatórios de Afiliados</h2>
+<h3>Relatórios de Afiliados</h3>
 
-<!-- 🔹 Cards de métricas principais -->
-<div class="d-flex justify-content-center gap-4 mb-4">
-    <div class="card text-center bg-primary text-white" style="width:260px; height:140px;">
-        <div class="card-body d-flex flex-column justify-content-center">
-            <h6 class="card-title">Cliques</h6>
-            <h3>@(Model?.Sum(r => r.Cliques) ?? 0)</h3>
-        </div>
-    </div>
-
-    <div class="card text-center bg-success text-white" style="width:260px; height:140px;">
-        <div class="card-body d-flex flex-column justify-content-center">
-            <h6 class="card-title">Vendas</h6>
-            <h3>@(Model?.Sum(r => r.Vendas) ?? 0)</h3>
-        </div>
-    </div>
-
-    <div class="card text-center bg-warning text-dark" style="width:260px; height:140px;">
-        <div class="card-body d-flex flex-column justify-content-center">
-            <h6 class="card-title">Comissão</h6>
-            <h3>R$ @(Model?.Sum(r => r.Comissao) ?? 0)</h3>
-        </div>
-    </div>
-</div>
-
-<!-- 🔹 Filtros -->
-<div class="card mb-4">
-    <div class="card-body">
-        <form class="row g-3">
-            <div class="col-md-4">
-                <label for="dataInicio" class="form-label">Data Início</label>
-                <input type="date" id="dataInicio" class="form-control" />
-            </div>
-            <div class="col-md-4">
-                <label for="dataFim" class="form-label">Data Fim</label>
-                <input type="date" id="dataFim" class="form-control" />
-            </div>
-            <div class="col-md-4 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary w-100">Filtrar</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- 🔹 Cards com gráficos -->
-<div class="d-flex justify-content-center gap-4 mb-4">
-    <div class="card text-center" style="width:220px;">
-        <div class="card-body">
-            <h6 class="card-title">Gráfico Pizza</h6>
-            <canvas id="graficoPizza" width="200" height="200"></canvas>
-        </div>
-    </div>
-
-    <div class="card text-center" style="width:220px;">
-        <div class="card-body">
-            <h6 class="card-title">Gráfico Donut</h6>
-            <canvas id="graficoDonut" width="200" height="200"></canvas>
-        </div>
-    </div>
-
-    <div class="card text-center" style="width:220px;">
-        <div class="card-body">
-            <h6 class="card-title">Gráfico Barras</h6>
-            <canvas id="graficoBarras" width="200" height="200"></canvas>
-        </div>
-    </div>
-</div>
-
-<!-- 🔹 Tabela -->
-<table class="table">
+<table class="table table-hover">
     <thead>
         <tr>
-            <th>Data</th>
-            <th>Produto</th>
-            <th>Cliques</th>
-            <th>Vendas</th>
-            <th>Comissão</th>
+            <th>Nome</th>
+            <th>Clique</th>
+            <th>Conversão (%)</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var relatorio in Model ?? Enumerable.Empty<Kanban.Models.RelatorioAfiliado>())
+        @foreach (var r in Model)
         {
             <tr>
-                <td>@relatorio.Data.ToShortDateString()</td>
-                <td>@relatorio.Produto</td>
-                <td>@relatorio.Cliques</td>
-                <td>@relatorio.Vendas</td>
-                <td>R$ @relatorio.Comissao</td>
+                <td>@r.Nome</td>
+                <td>@r.Cliques</td>
+                <td>@r.Conversao</td>
             </tr>
         }
     </tbody>
 </table>
-
-@section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        // 🔹 Gráfico Pizza
-        new Chart(document.getElementById('graficoPizza'), {
-            type: 'pie',
-            data: {
-                labels: ['Cliques', 'Vendas', 'Comissão'],
-                datasets: [{
-                    data: [@(Model?.Sum(r => r.Cliques) ?? 0), @(Model?.Sum(r => r.Vendas) ?? 0), @(Model?.Sum(r => r.Comissao) ?? 0)],
-                    backgroundColor: ['#007bff', '#28a745', '#ffc107']
-                }]
-            }
-        });
-
-        // 🔹 Gráfico Donut
-        new Chart(document.getElementById('graficoDonut'), {
-            type: 'doughnut',
-            data: {
-                labels: ['Produto A', 'Produto B', 'Produto C'],
-                datasets: [{
-                    data: [40, 30, 30],
-                    backgroundColor: ['#17a2b8', '#6f42c1', '#fd7e14']
-                }]
-            }
-        });
-
-        // 🔹 Gráfico Barras
-        new Chart(document.getElementById('graficoBarras'), {
-            type: 'bar',
-            data: {
-                labels: ['Jan', 'Fev', 'Mar'],
-                datasets: [{
-                    label: 'Vendas',
-                    data: [10, 20, 15],
-                    backgroundColor: '#20c997'
-                }]
-            },
-            options: {
-                responsive: false,
-                maintainAspectRatio: false
-            }
-        });
-    </script>
-}

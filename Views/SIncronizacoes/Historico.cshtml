@@ -1,0 +1,27 @@
+﻿@model List<Kanban.DTOs.SincronizacaoDto>
+
+@{
+    ViewData["Title"] = "Histórico de Sincronizações";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Data</th>
+            <th>Quantidade de Produtos</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var sync in Model)
+        {
+            <tr>
+                <td>@sync.Data.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@sync.QuantidadeProdutos</td>
+                <td>@sync.Status</td>
+            </tr>
+        }
+    </tbody>
+</table>

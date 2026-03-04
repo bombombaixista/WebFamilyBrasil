@@ -9,6 +9,15 @@ public class AppDbContext : DbContext
     public DbSet<Pedido> Pedidos { get; set; }
     public DbSet<ItemPedido> ItensPedido { get; set; }
     public DbSet<LogIntegracao> LogIntegracoes { get; set; }
+    public DbSet<AfiliadoProduto> AfiliadoProdutos { get; set; }
+    public DbSet<Campanha> Campanhas { get; set; }
+    public DbSet<LogClique> LogCliques { get; set; }
+    public DbSet<LogConversao> LogConversoes { get; set; }
+    public DbSet<LogSincronizacao> LogSincronizacoes { get; set; }
+    public DbSet<Alerta> Alertas { get; set; }
+    // 🔹 Novo DbSet para afiliados
+    public DbSet<ProdutoAfiliado> ProdutosAfiliados { get; set; }
+
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -42,21 +51,23 @@ public class AppDbContext : DbContext
                   .WithMany()
                   .HasForeignKey(c => c.PlanoId)
                   .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<Pedido>()
-    .HasOne(p => p.Cliente2)
-    .WithMany()
-    .HasForeignKey(p => p.Cliente2Id)
-    .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<ItemPedido>()
-                .HasOne(i => i.Pedido)
-                .WithMany(p => p.Itens)
-                .HasForeignKey(i => i.PedidoId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<Pedido>()
-                .HasIndex(p => p.MarketplaceOrderId);
         });
+
+        // Pedido
+        modelBuilder.Entity<Pedido>()
+            .HasOne(p => p.Cliente2)
+            .WithMany()
+            .HasForeignKey(p => p.Cliente2Id)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ItemPedido>()
+            .HasOne(i => i.Pedido)
+            .WithMany(p => p.Itens)
+            .HasForeignKey(i => i.PedidoId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Pedido>()
+            .HasIndex(p => p.MarketplaceOrderId);
 
         // Plano
         modelBuilder.Entity<Plano>(entity =>
@@ -96,6 +107,22 @@ public class AppDbContext : DbContext
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
+        // ProdutoAfiliado
+        modelBuilder.Entity<ProdutoAfiliado>(entity =>
+        {
+            entity.HasKey(p => p.Id);
+
+            entity.Property(p => p.Titulo)
+                  .HasMaxLength(200)
+                  .IsRequired();
+
+            entity.Property(p => p.Preco)
+                  .HasColumnType("decimal(10,2)");
+
+            entity.Property(p => p.LinkAfiliado)
+                  .HasMaxLength(500);
+        });
+
         // Seeding dos planos
         modelBuilder.Entity<Plano>().HasData(
             new Plano { Id = Guid.Parse("11111111-1111-1111-1111-111111111111"), Codigo = "C", Nome = "Básico", PrecoMensal = 79.90M },
@@ -103,4 +130,13 @@ public class AppDbContext : DbContext
             new Plano { Id = Guid.Parse("33333333-3333-3333-3333-333333333333"), Codigo = "A", Nome = "Empresarial", PrecoMensal = 119.90M }
         );
     }
+}
+
+// 🔹 Nova entidade para afiliados
+public class ProdutoAfiliado
+{
+    public string? Id { get; set; }            // ID do produto (MLBxxxxxx)
+    public string? Titulo { get; set; }        // Nome do produto
+    public decimal Preco { get; set; }        // Preço atual
+    public string? LinkAfiliado { get; set; }  // Link com tracking de afiliado
 }

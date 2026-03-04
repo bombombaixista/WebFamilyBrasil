@@ -1,41 +1,272 @@
 ﻿@{
-    ViewData["Title"] = "WebFamilyBrasil - Bem-vindo";
+    Layout = null;
 }
 
-<div class="container text-center mt-5">
-    <h1 class="mb-3">Bem-vindo à WebFamilyBrasil</h1>
-    <p class="lead mb-5">Organize tarefas, pipeline de vendas, e-commerce, agenda e muito mais!</p>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebFamilyBrasil - Dashboard ao Vivo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
 
-    <div class="d-flex justify-content-center gap-3 flex-wrap">
-        <!-- Botão para página de planos -->
-        <a asp-controller="Venda" asp-action="Index" class="btn btn-primary btn-lg">
-            Ver Planos
-        </a>
+        .hero {
+            background-color: #1c3d5a;
+            color: #fff;
+            padding: 80px 20px;
+            text-align: center;
+        }
 
-        <!-- Botão para página de login -->
-        <a asp-controller="Login" asp-action="Index" class="btn btn-outline-secondary btn-lg">
-            Já sou cliente
-        </a>
-    </div>
+            .hero h1 {
+                font-size: 2.5rem;
+                margin-bottom: 20px;
+            }
 
-    <div class="row mt-5">
-        <div class="col-md-4 mb-3">
-            <div class="card bg-light text-dark p-3 h-100">
-                <h5>Pipeline de Vendas</h5>
-                <p>Controle seus negócios de forma eficiente.</p>
+            .hero p {
+                font-size: 1.2rem;
+                max-width: 700px;
+                margin: 0 auto 30px;
+            }
+
+        .btn-whatsapp {
+            background-color: #25D366;
+            color: white;
+            font-weight: bold;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            text-decoration: none;
+        }
+
+        .features {
+            padding: 60px 20px;
+        }
+
+        .feature-box {
+            text-align: center;
+            padding: 20px;
+        }
+
+            .feature-box i {
+                font-size: 2.5rem;
+                margin-bottom: 15px;
+                color: #1c3d5a;
+            }
+
+        .chart-container {
+            max-width: 700px;
+            margin: 50px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .kpi-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+
+        .kpi-box {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            width: 150px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+            .kpi-box h4 {
+                margin-bottom: 10px;
+                color: #1c3d5a;
+            }
+
+        footer {
+            background-color: #1c3d5a;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+    <section class="hero">
+        <h1>Painel WebFamilyBrasil - Ao Vivo</h1>
+        <p>Monitore ações, câmbio e IBOV em tempo real. Tudo em um só lugar, com dados reais ou simulados se necessário.</p>
+        <a href="https://wa.me/5521991557799" class="btn-whatsapp">Falar com o criador</a>
+        <a href="/Cliente2/Cadastrar" class="btn btn-light" style="margin-left:15px; font-weight:bold; padding:15px 30px; border-radius:50px; color:#1c3d5a;">Login</a>
+    </section>
+
+    <section class="features container text-center">
+        <div class="row">
+            <div class="col-md-4 feature-box">
+                <i class="bi bi-graph-up-arrow"></i>
+                <h4>Controle sua margem</h4>
+                <p>Acompanhe seu lucro, margens e impactos de taxas e dólar em tempo real.</p>
+            </div>
+            <div class="col-md-4 feature-box">
+                <i class="bi bi-bar-chart-line"></i>
+                <h4>Inteligência de Dados</h4>
+                <p>Insights automáticos para decisões mais rápidas e precisas.</p>
+            </div>
+            <div class="col-md-4 feature-box">
+                <i class="bi bi-shield-check"></i>
+                <h4>Plataforma Confiável</h4>
+                <p>Estável, seguro e moderno para vendedores profissionais.</p>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
-            <div class="card bg-light text-dark p-3 h-100">
-                <h5>Organizador de Tarefas</h5>
-                <p>Gerencie suas atividades e prazos com facilidade.</p>
-            </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="card bg-light text-dark p-3 h-100">
-                <h5>E-commerce Integrado</h5>
-                <p>Venda online e acompanhe pedidos em tempo real.</p>
-            </div>
-        </div>
-    </div>
-</div>
+    </section>
+
+    <section class="kpi-container" id="kpiContainer"></section>
+
+    <section class="chart-container">
+        <canvas id="acoesChart"></canvas>
+        <p style="text-align:center; margin-top:10px;">Cotação das ações brasileiras</p>
+    </section>
+
+    <section class="chart-container">
+        <canvas id="cambioChart"></canvas>
+        <p style="text-align:center; margin-top:10px;">Câmbio USD e EUR</p>
+    </section>
+
+    <section class="chart-container">
+        <canvas id="ibovChart"></canvas>
+        <p style="text-align:center; margin-top:10px;">IBOV / Mercado</p>
+    </section>
+
+    <footer>
+        © 2026 WebFamilyBrasil - Dashboard ao Vivo
+    </footer>
+
+    <script>
+        function gerarHistorico(valorAtual, pontos=10, variacaoPercent=2){
+            const historico = [];
+            let v = parseFloat(valorAtual);
+            for(let i=0;i<pontos;i++){
+                const variacao = v * (Math.random()*variacaoPercent/100 - variacaoPercent/200);
+                v = parseFloat((v + variacao).toFixed(2));
+                historico.push(v);
+            }
+            return historico;
+        }
+
+        let chartAcoes, chartCambio, chartIBOV;
+        let ultimoValores = {};
+
+        async function atualizarDashboardFinal() {
+            const res = await fetch('/api/dados');
+            const dadosAPI = await res.json();
+
+            const dados = {};
+            dados["PETR4"] = dadosAPI["PETR4"] && dadosAPI["PETR4"] !== 0 ? dadosAPI["PETR4"] : (20 + Math.random()*5).toFixed(2);
+            dados["VALE3"] = dadosAPI["VALE3"] && dadosAPI["VALE3"] !== 0 ? dadosAPI["VALE3"] : (90 + Math.random()*5).toFixed(2);
+            dados["ITUB4"] = dadosAPI["ITUB4"] && dadosAPI["ITUB4"] !== 0 ? dadosAPI["ITUB4"] : (25 + Math.random()*3).toFixed(2);
+            dados["USD"] = dadosAPI["USD"] && dadosAPI["USD"] !== 0 ? dadosAPI["USD"] : (5 + Math.random()*0.2).toFixed(2);
+            dados["EUR"] = dadosAPI["EUR"] && dadosAPI["EUR"] !== 0 ? dadosAPI["EUR"] : (5.5 + Math.random()*0.2).toFixed(2);
+            dados["IBOV"] = dadosAPI["IBOV"] && dadosAPI["IBOV"] !== 0 ? dadosAPI["IBOV"] : (120000 + Math.random()*5000).toFixed(0);
+            dados["MargemMedia"] = dadosAPI["MargemMedia"] && dadosAPI["MargemMedia"] !== 0 ? dadosAPI["MargemMedia"] : (75 + Math.random()*5).toFixed(0);
+            dados["LucroEstimado"] = dadosAPI["LucroEstimado"] && dadosAPI["LucroEstimado"] !== 0 ? dadosAPI["LucroEstimado"] : (50000 + Math.random()*10000).toFixed(0);
+
+            // KPIs com cores dinâmicas
+            const kpiContainer = document.getElementById('kpiContainer');
+            kpiContainer.innerHTML = '';
+            const keys = ["PETR4","VALE3","ITUB4","USD","EUR","IBOV","MargemMedia","LucroEstimado"];
+            keys.forEach(k => {
+                const valorAtual = parseFloat(dados[k]);
+                let cor = '#1c3d5a'; // neutra
+                if(ultimoValores[k] !== undefined){
+                    if(valorAtual > ultimoValores[k]) cor = 'green';
+                    else if(valorAtual < ultimoValores[k]) cor = 'red';
+                }
+                ultimoValores[k] = valorAtual;
+
+                const div = document.createElement('div');
+                div.className='kpi-box';
+                div.innerHTML=`<h4>${k}</h4><p style="color:${cor}; font-weight:bold;">${dados[k]}</p>`;
+                kpiContainer.appendChild(div);
+            });
+
+            // Históricos
+            const historicoPETR4 = gerarHistorico(dados["PETR4"]);
+            const historicoVALE3 = gerarHistorico(dados["VALE3"]);
+            const historicoITUB4 = gerarHistorico(dados["ITUB4"]);
+            const historicoUSD = gerarHistorico(dados["USD"]);
+            const historicoEUR = gerarHistorico(dados["EUR"]);
+            const historicoIBOV = gerarHistorico(dados["IBOV"]);
+
+            // Gráficos
+            if(!chartAcoes){
+                chartAcoes = new Chart(document.getElementById('acoesChart').getContext('2d'), {
+                    type:'line',
+                    data:{
+                        labels:Array.from({length:historicoPETR4.length},(_,i)=>`Dia ${i+1}`),
+                        datasets:[
+                            {label:'PETR4',data:historicoPETR4,borderColor:'#1c3d5a',fill:false},
+                            {label:'VALE3',data:historicoVALE3,borderColor:'#25D366',fill:false},
+                            {label:'ITUB4',data:historicoITUB4,borderColor:'#ff9800',fill:false}
+                        ]
+                    },
+                    options:{responsive:true,plugins:{legend:{position:'top'}}}
+                });
+            } else {
+                chartAcoes.data.datasets[0].data = historicoPETR4;
+                chartAcoes.data.datasets[1].data = historicoVALE3;
+                chartAcoes.data.datasets[2].data = historicoITUB4;
+                chartAcoes.update();
+            }
+
+            if(!chartCambio){
+                chartCambio = new Chart(document.getElementById('cambioChart').getContext('2d'),{
+                    type:'line',
+                    data:{
+                        labels:Array.from({length:historicoUSD.length},(_,i)=>`Dia ${i+1}`),
+                        datasets:[
+                            {label:'USD/BRL',data:historicoUSD,borderColor:'#007bff',fill:false},
+                            {label:'EUR/BRL',data:historicoEUR,borderColor:'#6f42c1',fill:false}
+                        ]
+                    },
+                    options:{responsive:true,plugins:{legend:{position:'top'}}}
+                });
+            } else {
+                chartCambio.data.datasets[0].data = historicoUSD;
+                chartCambio.data.datasets[1].data = historicoEUR;
+                chartCambio.update();
+            }
+
+            if(!chartIBOV){
+                chartIBOV = new Chart(document.getElementById('ibovChart').getContext('2d'),{
+                    type:'bar',
+                    data:{
+                        labels:Array.from({length:historicoIBOV.length},(_,i)=>`Dia ${i+1}`),
+                        datasets:[{label:'IBOV',data:historicoIBOV,backgroundColor:'#1c3d5a'}]
+                    },
+                    options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
+                });
+            } else {
+                chartIBOV.data.datasets[0].data = historicoIBOV;
+                chartIBOV.update();
+            }
+        }
+
+        // Inicializa dashboard e atualiza a cada 10s
+        atualizarDashboardFinal();
+        setInterval(atualizarDashboardFinal, 10000);
+
+    </script>
+
+</body>
+</html>
