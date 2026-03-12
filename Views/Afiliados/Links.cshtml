@@ -1,15 +1,54 @@
 ﻿@model List<dynamic>
+
 @{
-    ViewData["Title"] = "Links";
+    ViewData["Title"] = "Links Afiliados";
 }
 
-<h3>Links Afiliados</h3>
+<style>
 
-<ul class="list-group">
+    .linktree-container{
+        max-width:600px;
+        margin:auto;
+    }
+
+    .link-card{
+        border-radius:12px;
+        margin-bottom:15px;
+        padding:18px;
+        font-size:18px;
+        transition:0.2s;
+    }
+
+    .link-card:hover{
+        transform:scale(1.02);
+    }
+
+</style>
+
+<div class="container mt-5 linktree-container">
+
+    <div class="text-center mb-4">
+
+        <h2>🔗 Links Afiliados</h2>
+
+        <p class="text-muted">
+            Central de acesso rápido ao Mercado Livre
+        </p>
+
+    </div>
+
     @foreach (var link in Model)
     {
-        <li class="list-group-item">
-            <a href="@link.Url" target="_blank">@link.Nome</a>
-        </li>
+
+        <a href="@link.Url"
+           target="_blank"
+           class="btn btn-warning w-100 link-card">
+
+            <i class="bi @link.Icone"></i>
+            @link.Nome
+
+        </a>
+
     }
-</ul>
+
+</div>

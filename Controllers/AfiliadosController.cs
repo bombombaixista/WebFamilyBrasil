@@ -1,88 +1,27 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Net.Http;
-using System.Text.Json;
 
 namespace Kanban.Controllers
 {
     public class AfiliadosController : Controller
     {
-        private readonly HttpClient _http;
-
-        public AfiliadosController(HttpClient http)
-        {
-            _http = http;
-        }
-
-        // GET: /Afiliados/Produtos
-        public async Task<IActionResult> Produtos()
-        {
-            var listaProdutos = new List<object>();
-            var url = "https://api.mercadolibre.com/users/me/items/search"; // substitua pela sua URL real ou LinkTree
-
-            try
-            {
-                var res = await _http.GetStringAsync(url);
-                var json = JsonDocument.Parse(res);
-
-                if (json.RootElement.TryGetProperty("results", out var results))
-                {
-                    foreach (var item in results.EnumerateArray())
-                    {
-                        listaProdutos.Add(new
-                        {
-                            Id = item.GetProperty("id").GetString(),
-                            Title = item.GetProperty("title").GetString(),
-                            Link = $"https://www.mercadolivre.com.br/{item.GetProperty("id").GetString()}"
-                        });
-                    }
-                }
-            }
-            catch
-            {
-                listaProdutos.Add(new { Id = "0", Title = "Nenhum produto encontrado", Link = "#" });
-            }
-
-            return View(listaProdutos);
-        }
-
-        // GET: /Afiliados/Links
         public IActionResult Links()
         {
-            var links = new List<object>
+            var links = new List<dynamic>
             {
-                new { Nome="LinkTree", Url="https://linktr.ee/seu_usuario" },
-                new { Nome="Promoções", Url="https://www.mercadolivre.com.br/ofertas" }
+                new { Nome="Mercado Livre", Url="https://www.mercadolivre.com.br", Icone="bi-shop"},
+                new { Nome="Ofertas do Dia", Url="https://www.mercadolivre.com.br/ofertas", Icone="bi-lightning"},
+                new { Nome="Mais Vendidos", Url="https://www.mercadolivre.com.br/mais-vendidos", Icone="bi-graph-up"},
+
+                new { Nome="Tecnologia", Url="https://lista.mercadolivre.com.br/eletronicos-audio-video", Icone="bi-cpu"},
+                new { Nome="Moda", Url="https://lista.mercadolivre.com.br/roupas", Icone="bi-bag"},
+                new { Nome="Casa e Móveis", Url="https://lista.mercadolivre.com.br/casa-moveis-decoracao", Icone="bi-house"},
+                new { Nome="Esportes", Url="https://lista.mercadolivre.com.br/esportes-fitness", Icone="bi-trophy"},
+
+                // Monitoramento de cliques no Mercado Livre
+                new { Nome="Monitoramento de Cliques", Url="https://www.mercadolivre.com.br/afiliados", Icone="bi-bar-chart"}
             };
+
             return View(links);
-        }
-
-        // GET: /Afiliados/Campanhas
-        public IActionResult Campanhas()
-        {
-            var campanhas = new List<object>
-            {
-                new { Nome="Campanha 1", Status="Ativa", Vendas=120 },
-                new { Nome="Campanha 2", Status="Finalizada", Vendas=250 }
-            };
-            return View(campanhas);
-        }
-
-        // GET: /Afiliados/Relatorios
-        public IActionResult Relatorios()
-        {
-            var relatorios = new List<object>
-            {
-                new { Nome="Relatório 1", Cliques=150, Conversao=12 },
-                new { Nome="Relatório 2", Cliques=300, Conversao=18 }
-            };
-            return View(relatorios);
-        }
-
-        // GET: /Afiliados/Configuracoes
-        public IActionResult Configuracoes()
-        {
-            var config = new { Notificacoes = true, Pagamento = "Pix", Tema = "Claro" };
-            return View(config);
         }
     }
 }

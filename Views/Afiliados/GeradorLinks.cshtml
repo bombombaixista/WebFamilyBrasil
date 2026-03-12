@@ -1,0 +1,80 @@
+﻿@model IEnumerable<dynamic>
+
+<h3>🔗 Gerador de Links Afiliados</h3>
+
+<form method="get">
+
+    <div class="input-group mb-3">
+
+        <input type="text"
+               name="busca"
+               class="form-control"
+               placeholder="Buscar produto">
+
+        <button class="btn btn-primary">
+            Buscar
+        </button>
+
+    </div>
+
+</form>
+
+<div class="row">
+
+    @foreach (var p in Model)
+    {
+
+        var linkAfiliado = p.link + "?tracking_id=SEU_ID_AFILIADO";
+
+        <div class="col-md-3">
+
+            <div class="card mb-3">
+
+                <img src="@p.imagem" class="card-img-top">
+
+                <div class="card-body">
+
+                    <h6>@p.titulo</h6>
+
+                    <strong>R$ @p.preco</strong>
+
+                    <input type="text"
+                           class="form-control mt-2"
+                           value="@linkAfiliado"
+                           id="link_@p.id">
+
+                    <button class="btn btn-success btn-sm mt-2"
+                            onclick="copiar('link_@p.id')">
+                        Copiar Link
+                    </button>
+
+                    <a href="@linkAfiliado"
+                       target="_blank"
+                       class="btn btn-primary btn-sm mt-2">
+                        Abrir
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    }
+
+</div>
+
+<script>
+
+    function copiar(id)
+    {
+        var copyText = document.getElementById(id);
+
+        copyText.select();
+
+        navigator.clipboard.writeText(copyText.value);
+
+        alert("Link copiado!");
+    }
+
+</script>
