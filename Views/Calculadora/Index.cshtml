@@ -1,0 +1,155 @@
+﻿@model Kanban.Models.CalculadoraResultado
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+<div class="container mt-4">
+
+    <h2>Calculadora Inteligente</h2>
+
+    <!-- FORM -->
+    <form method="post" class="row g-3 mb-4">
+
+        <div class="col-md-3">
+            <label>Categoria</label>
+            <select name="categoria" class="form-control">
+                <option selected="@(Model?.Categoria == "Tecnologia")">Tecnologia</option>
+                <option selected="@(Model?.Categoria == "Moda")">Moda</option>
+                <option selected="@(Model?.Categoria == "Casa")">Casa</option>
+                <option selected="@(Model?.Categoria == "Esportes")">Esportes</option>
+                <option selected="@(Model?.Categoria == "Importado")">Importado</option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label>Preço Venda</label>
+            <input name="precoVenda" type="number" step="0.01" class="form-control" value="@Model?.PrecoVenda" />
+        </div>
+
+        <div class="col-md-3">
+            <label>Custo Produto</label>
+            <input name="custoProduto" type="number" step="0.01" class="form-control" value="@Model?.CustoProduto" />
+        </div>
+
+        <div class="col-md-3">
+            <label>Frete</label>
+            <input name="frete" type="number" step="0.01" class="form-control" value="@Model?.Frete" />
+        </div>
+
+        <div class="col-md-3">
+            <label>Taxa (%)</label>
+            <input name="taxaPercentual" type="number" class="form-control" value="@(Model?.TaxaPercentual ?? 16)" />
+        </div>
+
+        <div class="col-md-3">
+            <label>Margem (%)</label>
+            <input name="margemDesejada" type="number" class="form-control" value="@Model?.MargemDesejada" />
+        </div>
+
+        <div class="col-md-3">
+            <label>Imposto (%)</label>
+            <input name="impostoPercentual" type="number" class="form-control" value="@Model?.ImpostoPercentual" />
+        </div>
+
+        <div class="col-12">
+            <button class="btn btn-primary">Calcular</button>
+        </div>
+
+    </form>
+
+    @if (Model != null)
+    {
+        <!-- ALERTA -->
+        <div class="alert alert-dark text-center">
+            <b>@Model.Alerta</b>
+        </div>
+
+        <!-- CARDS -->
+        <div class="row text-center mb-4">
+
+            <div class="col-md-3">
+                <div class="card bg-success text-white p-3">
+                    <h6>Lucro</h6>
+                    <h4>@Model.Lucro.ToString("C")</h4>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card bg-primary text-white p-3">
+                    <h6>Margem</h6>
+                    <h4>@Model.Margem.ToString("F2") %</h4>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card bg-warning p-3">
+                    <h6>Imposto</h6>
+                    <h4>@Model.ImpostoValor.ToString("C")</h4>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card bg-danger text-white p-3">
+                    <h6>Taxa</h6>
+                    <h4>@Model.TaxaValor.ToString("C")</h4>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- GRÁFICOS PEQUENOS -->
+        <div class="row text-center mb-4">
+
+            <div class="col-md-4">
+                <canvas id="graficoPizza" width="220" height="220"></canvas>
+            </div>
+
+            <div class="col-md-4">
+                <canvas id="graficoDonut" width="220" height="220"></canvas>
+            </div>
+
+            <div class="col-md-4">
+                <canvas id="graficoBarra" width="220" height="220"></canvas>
+            </div>
+
+        </div>
+
+        <!-- PREÇO -->
+        <div class="card text-center p-4">
+            <h5>Preço Sugerido</h5>
+            <h2 class="text-success">@Model.PrecoSugerido.ToString("C")</h2>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <script>
+            const dados = JSON.parse('@Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
+                custo = Model.CustoProduto,
+                frete = Model.Frete,
+                imposto = Model.ImpostoValor,
+                taxa = Model.TaxaValor,
+                lucro = Model.Lucro
+            }))');
+
+            const base = { responsive: false };
+
+            new Chart(graficoPizza, {
+                type: "pie",
+                data: { labels: ["Custo","Frete","Imposto","Taxa","Lucro"], datasets: [{ data: Object.values(dados) }] },
+                options: base
+            });
+
+            new Chart(graficoDonut, {
+                type: "doughnut",
+                data: { labels: ["Custos","Lucro"], datasets: [{ data: [dados.custo+dados.frete+dados.imposto+dados.taxa, dados.lucro] }] },
+                options: base
+            });
+
+            new Chart(graficoBarra, {
+                type: "bar",
+                data: { labels: ["Custo","Frete","Imposto","Taxa","Lucro"], datasets: [{ data: Object.values(dados) }] },
+                options: base
+            });
+        </script>
+    }
+
+</div>

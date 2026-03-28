@@ -1,10 +1,12 @@
 ﻿using Kanban.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Kanban.Controllers
 {
+    [Authorize]
     public class DocumentoController : Controller
     {
         // Simulação de dados em memória (substitua por DbContext depois)

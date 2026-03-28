@@ -32,7 +32,7 @@ builder.Services.AddScoped<MercadoPagoService>();
 builder.Services.AddHostedService<MercadoLivreTokenBackgroundService>();
 builder.Services.AddHttpClient<BolsaService>();
 builder.Services.AddHttpClient<AfiliadosController>();
-
+builder.Services.AddScoped<CalculadoraService>();
 
 
 

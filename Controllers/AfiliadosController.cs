@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Kanban.Controllers
 {
+    [Authorize]
     public class AfiliadosController : Controller
     {
         public IActionResult Links()
