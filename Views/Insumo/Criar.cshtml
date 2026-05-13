@@ -1,0 +1,44 @@
+﻿@model WebFamilyBrasil.Models.Insumo
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+
+<div class="container mt-4">
+    <h2 class="mb-3">Cadastrar Novo Insumo</h2>
+
+    <form asp-action="Criar" method="post" class="row g-3">
+        <div class="col-md-6">
+            <label asp-for="Nome" class="form-label"></label>
+            <input asp-for="Nome" class="form-control" />
+            <span asp-validation-for="Nome" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="Tipo" class="form-label"></label>
+            <input asp-for="Tipo" class="form-control" />
+            <span asp-validation-for="Tipo" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="Quantidade" class="form-label"></label>
+            <input asp-for="Quantidade" type="number" class="form-control" />
+            <span asp-validation-for="Quantidade" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="CustoUnitario" class="form-label"></label>
+            <input asp-for="CustoUnitario" type="number" step="0.01" class="form-control" />
+            <span asp-validation-for="CustoUnitario" class="text-danger"></span>
+        </div>
+
+        <div class="col-12">
+            <button type="submit" class="btn btn-success">Salvar</button>
+            <a asp-action="Index" class="btn btn-secondary">Voltar</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

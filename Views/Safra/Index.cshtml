@@ -1,0 +1,45 @@
+﻿@model IEnumerable<WebFamilyBrasil.Models.Safra>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+
+<div class="container mt-4">
+    <h2 class="mb-3">Safras Cadastradas</h2>
+
+    <!-- Botão para criar nova safra -->
+    <div class="mb-3">
+        <a asp-action="Criar" class="btn btn-primary">+ Nova Safra</a>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <table class="table table-striped table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Talhão</th>
+                    <th>Cultura</th>
+                    <th>Data Plantio</th>
+                    <th>Data Colheita</th>
+                    <th>Custo Estimado</th>
+                    <th>Produção Esperada</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var safra in Model)
+                {
+                    <tr>
+                        <td>@safra.Talhao</td>
+                        <td>@safra.Cultura</td>
+                        <td>@safra.DataPlantio.ToShortDateString()</td>
+                        <td>@safra.DataColheita.ToShortDateString()</td>
+                        <td>@safra.CustoEstimado.ToString("C")</td>
+                        <td>@safra.ProducaoEsperada</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p class="alert alert-warning">Nenhuma safra cadastrada ainda.</p>
+    }
+</div>

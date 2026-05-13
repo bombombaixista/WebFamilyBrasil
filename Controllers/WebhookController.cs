@@ -77,6 +77,10 @@ public class WebhookController : ControllerBase
                     await TratarPergunta(root, cliente, json, jsonRecebido);
                     break;
 
+                case "payments":
+                    await TratarPagamento(root, cliente, json, jsonRecebido);
+                    break;
+
                 default:
                     _context.LogIntegracoes.Add(new LogIntegracao
                     {
@@ -174,5 +178,23 @@ public class WebhookController : ControllerBase
             Conteudo = $"Pergunta {perguntaId}: {texto}",
             Sucesso = true
         });
+    }
+
+    private async Task TratarPagamento(JsonElement payment, Cliente2 cliente, string json, string jsonRecebido)
+    {
+        var paymentId = payment.GetProperty("id").GetString();
+        var status = payment.GetProperty("status").GetString();
+        var valor = payment.GetProperty("transaction_amount").GetDecimal();
+
+        _context.LogIntegracoes.Add(new LogIntegracao
+        {
+            Tipo = "Webhook",
+            Marketplace = "MercadoLivre",
+            Evento = "AtualizacaoPagamento",
+            Conteudo = $"Pagamento {paymentId} - Status: {status} - Valor: R${valor}",
+            Sucesso = true
+        });
+
+        // Aqui você pode salvar/atualizar o pagamento em sua tabela de pedidos ou pagamentos
     }
 }
