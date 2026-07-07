@@ -106,14 +106,10 @@
         </div>
 
         <div class="col-md-3">
-            <label class="form-label">Início</label>
-            <input type="date" id="filtroInicio" class="form-control">
+            <label class="form-label">Tipo</label>
+            <select id="tipo" class="form-select"></select>
         </div>
 
-        <div class="col-md-3">
-            <label class="form-label">Fim</label>
-            <input type="date" id="filtroFim" class="form-control">
-        </div>
 
         <div class="col-md-2 d-flex gap-2">
             <button class="btn btn-success w-100" onclick="aplicarFiltros()">Filtrar</button>
@@ -180,9 +176,21 @@
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Categoria</label>
-                    <input id="categoria" class="form-control">
+                    <label class="form-label">Categoria (DRE)</label>
+                    <select id="categoria" class="form-select">
+                        <option value="">Selecione</option>
+                        <option value="Vendas">Vendas</option>
+                        <option value="Deducoes">Deduções</option>
+                        <option value="CMV">CMV</option>
+                        <option value="DespesasVendas">Despesas com Vendas</option>
+                        <option value="DespesasAdm">Despesas Administrativas</option>
+                        <option value="DespesasFinanceiras">Despesas Financeiras</option>
+                        <option value="ReceitasFinanceiras">Receitas Financeiras</option>
+                        <option value="OutrasReceitas">Outras Receitas</option>
+                        <option value="OutrasDespesas">Outras Despesas</option>
+                    </select>
                 </div>
+
 
                 <div class="col-md-6">
                     <label class="form-label">Data</label>
@@ -401,6 +409,47 @@
             };
             reader.readAsText(file);
         }
+
+        <script>
+        function carregarTiposLancamento() {
+        fetch('/Financeiro/TiposLancamento')
+        .then(response => response.json())
+        .then(tipos => {
+        const select = document.getElementById('tipo');
+        select.innerHTML = '<option value="">Selecione</option>';
+        tipos.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t;
+        opt.textContent = t;
+        select.appendChild(opt);
+        });
+        });
+        }
+
+        function carregarCategoriasDRE() {
+        fetch('/Financeiro/CategoriasDRE')
+        .then(response => response.json())
+        .then(categorias => {
+        const select = document.getElementById('categoria');
+        select.innerHTML = '<option value="">Selecione</option>';
+        categorias.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c;
+        select.appendChild(opt);
+        });
+        });
+        }
+
+        // Chama ao abrir o modal
+        function abrirModalNovo() {
+        carregarTiposLancamento();
+        carregarCategoriasDRE();
+        var modal = new bootstrap.Modal(document.getElementById('modalFinanceiro'));
+        modal.show();
+        }
+    </script>
+
 
         // ===== GRÁFICOS =====
         function atualizarGraficos(lista) {

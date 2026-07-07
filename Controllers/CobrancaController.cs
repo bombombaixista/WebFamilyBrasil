@@ -1,10 +1,12 @@
 ﻿using Kanban.Models;
 using Kanban.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kanban.Controllers
 {
+    [Authorize]
     public class CobrancaController : Controller
     {
         private readonly AppDbContext _dbContext;
@@ -33,7 +35,7 @@ namespace Kanban.Controllers
             if (plano == null)
                 return BadRequest("Cliente não possui plano associado.");
 
-            // Cria cobrança
+            // Cria cobrança (Mantido para o sistema não quebrar a lógica de banco)
             var cobranca = new Cobranca
             {
                 Id = Guid.NewGuid(),

@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using WebFamilyBrasil.Models;
 
 namespace WebFamilyBrasil.Controllers
 {
+    [Authorize]
     public class InsumoController : Controller
     {
         private static List<Insumo> _insumos = new();

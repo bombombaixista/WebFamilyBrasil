@@ -1,4 +1,4 @@
-﻿@model Kanban.Models.Transacao
+﻿@model Kanban.Models.Financeiro
 
 @{
     ViewData["Title"] = "Nova Transação";
@@ -11,8 +11,24 @@
         <label class="form-label">Tipo</label>
         <select asp-for="Tipo" class="form-select" required>
             <option value="">Selecione</option>
-            <option value="Entrada">Entrada</option>
-            <option value="Saída">Saída</option>
+            <option value="Receita">Receita</option>
+            <option value="Despesa">Despesa</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Categoria (DRE)</label>
+        <select asp-for="Categoria" class="form-select" required>
+            <option value="">Selecione</option>
+            <option value="Vendas">Vendas</option>
+            <option value="Deducoes">Deduções</option>
+            <option value="CMV">CMV</option>
+            <option value="DespesasVendas">Despesas com Vendas</option>
+            <option value="DespesasAdm">Despesas Administrativas</option>
+            <option value="DespesasFinanceiras">Despesas Financeiras</option>
+            <option value="ReceitasFinanceiras">Receitas Financeiras</option>
+            <option value="OutrasReceitas">Outras Receitas</option>
+            <option value="OutrasDespesas">Outras Despesas</option>
         </select>
     </div>
 
@@ -32,5 +48,5 @@
     </div>
 
     <button type="submit" class="btn btn-success">Salvar</button>
-    <a class="btn btn-secondary" href="/Kanban/Index">Cancelar</a>
+    <a class="btn btn-secondary" href="/Financeiro/RelatorioDRE">Cancelar</a>
 </form>

@@ -34,6 +34,19 @@ builder.Services.AddHttpClient<BolsaService>();
 builder.Services.AddHttpClient<AfiliadosController>();
 builder.Services.AddScoped<CalculadoraService>();
 
+// REGISTRO DO EMAILSERVICE USANDO AS VARIÁVEIS DO RAILWAY:
+builder.Services.AddScoped<EmailService>(provider =>
+{
+    var config = provider.GetRequiredService<IConfiguration>();
+
+    // Busca os valores que o Railway injetará no ambiente
+    string host = config["EmailSettings:Host"] ?? "";
+    int port = int.Parse(config["EmailSettings:Port"] ?? "587");
+    string user = config["EmailSettings:Username"] ?? "";
+    string pass = config["EmailSettings:Password"] ?? "";
+
+    return new EmailService(host, port, user, pass);
+});
 
 
 // ==========================

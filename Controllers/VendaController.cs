@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Kanban.Model;
+﻿using Kanban.Model;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
 
 namespace WebFamily.Controllers
 {
+    [Authorize]
     public class VendaController : Controller
     {
         private readonly AppDbContext _context;

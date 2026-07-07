@@ -1,0 +1,84 @@
+﻿@model Kanban.Models.DreRelatorio
+
+@{
+    ViewData["Title"] = "Relatório DRE";
+}
+
+<h2>Relatório DRE Completo</h2>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Descrição</th>
+            <th>Valor (R$)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td>Receita Bruta</td><td>@Model.ReceitaBruta.ToString("N2")</td></tr>
+        <tr><td>(-) Deduções</td><td>@Model.Deducoes.ToString("N2")</td></tr>
+        <tr><td>Receita Líquida</td><td>@Model.ReceitaLiquida.ToString("N2")</td></tr>
+        <tr><td>(-) CMV</td><td>@Model.CMV.ToString("N2")</td></tr>
+        <tr><td>Lucro Bruto</td><td>@Model.LucroBruto.ToString("N2")</td></tr>
+        <tr><td>(-) Despesas com Vendas</td><td>@Model.DespesasVendas.ToString("N2")</td></tr>
+        <tr><td>(-) Despesas Administrativas</td><td>@Model.DespesasAdm.ToString("N2")</td></tr>
+        <tr><td>(-) Despesas Financeiras</td><td>@Model.DespesasFinanceiras.ToString("N2")</td></tr>
+        <tr><td>(+) Receitas Financeiras</td><td>@Model.ReceitasFinanceiras.ToString("N2")</td></tr>
+        <tr><td>Resultado Operacional</td><td>@Model.ResultadoOperacional.ToString("N2")</td></tr>
+        <tr><td>(+) Outras Receitas</td><td>@Model.OutrasReceitas.ToString("N2")</td></tr>
+        <tr><td>(-) Outras Despesas</td><td>@Model.OutrasDespesas.ToString("N2")</td></tr>
+        <tr><td>LAIR</td><td>@Model.LAIR.ToString("N2")</td></tr>
+        <tr><td>(-) Impostos</td><td>@Model.Impostos.ToString("N2")</td></tr>
+        <tr class="table-success">
+            <td><strong>Lucro Líquido</strong></td>
+            <td><strong>@Model.LucroLiquido.ToString("N2")</strong></td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>Visão Gráfica</h3>
+<canvas id="dreChart" width="400" height="200"></canvas>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        var ctx = document.getElementById('dreChart').getContext('2d');
+        var dreChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+        labels: ['Receita Líquida', 'Lucro Bruto', 'Lucro Líquido'],
+        datasets: [{
+        label: 'Valores (R$)',
+        data: [
+        @Model.ReceitaLiquida,
+        @Model.LucroBruto,
+        @Model.LucroLiquido
+        ],
+        backgroundColor: [
+        'rgba(54, 162, 235, 0.7)',
+        'rgba(255, 206, 86, 0.7)',
+        'rgba(75, 192, 192, 0.7)'
+        ],
+        borderColor: [
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)',
+        'rgba(75, 192, 192, 1)'
+        ],
+        borderWidth: 1
+        }]
+        },
+        options: {
+        responsive: true,
+        plugins: {
+        legend: { display: false },
+        title: { display: true, text: 'Comparativo de Indicadores da DRE' }
+        },
+        scales: {
+        y: {
+        beginAtZero: true,
+        ticks: { callback: value => 'R$ ' + value.toLocaleString() }
+        }
+        }
+        }
+        });
+    </script>
+}

@@ -6,7 +6,7 @@ namespace Kanban.Controllers
     {
         public IActionResult Index()
         {
-            return Index();
+            return View();
         }
     }
 }

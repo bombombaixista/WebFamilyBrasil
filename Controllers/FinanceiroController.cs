@@ -41,6 +41,43 @@ namespace Kanban.Controllers
             return Path.Combine(GetUserDataPath(), "financeiro.json");
         }
 
+        [HttpGet("Create")]
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost("Create")]
+        public IActionResult Create(Financeiro registro)
+        {
+            var path = GetFinanceiroFilePath();
+            var registros = System.IO.File.Exists(path)
+                ? JsonSerializer.Deserialize<List<Financeiro>>(System.IO.File.ReadAllText(path), _jsonOptions) ?? new List<Financeiro>()
+                : new List<Financeiro>();
+
+            registro.Id = registros.Count > 0 ? registros.Max(r => r.Id) + 1 : 1;
+            registros.Add(registro);
+
+            System.IO.File.WriteAllText(path, JsonSerializer.Serialize(registros, _jsonOptions));
+            return RedirectToAction("RelatorioDRE");
+        }
+
+
+        [HttpGet("RelatorioDRE")]
+        public IActionResult RelatorioDRE()
+        {
+            var path = GetFinanceiroFilePath();
+            if (!System.IO.File.Exists(path)) return View(new DreRelatorio());
+
+            var registros = JsonSerializer.Deserialize<List<Financeiro>>(System.IO.File.ReadAllText(path), _jsonOptions) ?? new List<Financeiro>();
+            var dreService = new Kanban.Services.DreService();
+            var relatorio = dreService.GerarDre(registros);
+
+            return View(relatorio);
+        }
+
+
+
         // =========================
         // INDEX
         // =========================
